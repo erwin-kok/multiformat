@@ -1,3 +1,4 @@
+// Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multihash.hashers
 
 class Shake(rate: Int, outputLen: Int, dsbyte: Byte) : Sha3(rate, outputLen, dsbyte) {

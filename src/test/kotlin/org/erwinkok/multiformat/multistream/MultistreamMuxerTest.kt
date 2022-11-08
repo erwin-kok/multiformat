@@ -1,3 +1,4 @@
+// Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package org.erwinkok.multiformat.multistream
