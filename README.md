@@ -1,31 +1,34 @@
 # multiformat
+Self-describing values for Future-proofing
 
 [![ci](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml/badge.svg)](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/github/license/erwin-kok/multiformat.svg)](https://github.com/erwin-kok/multiformat/blob/master/LICENSE)
 
 ## Introduction
 
-This project contains various cryptographic utilities used by libp2p. It can generate key pairs (private/public keys), 
-marshal and unmarshal these public and private keys. Further it is possible to sign and verify messages. And lastly it
-supports converting these private/public to/from protocol buffer format. 
+This project implements various protocols defined at: https://multiformats.io/
 
-Four cryptographic key types are currently supported:
-- ecdsa
-- ed25519
-- secp256k1
-- rsa
+Notably, the following protocols are implemented:
+
+- multihash (https://multiformats.io/multihash/)
+- multiaddr (https://multiformats.io/multiaddr/)
+- multibase (https://github.com/multiformats/multibase)
+- multicodec (https://github.com/multiformats/multicodec)
+
+Next to this, it also implements Cid: https://github.com/multiformats/cid
+
 
 ## Using the Result Monad
 
 This project is using the [result-monad](https://github.com/erwin-kok/result-monad)
 
-This means that all methods of `CryptoUtil` return a `Result<...>`. The caller can check whether an error was generated, 
+This means that (almost) all methods of this project return a `Result<...>`. The caller can check whether an error was generated, 
 or it can use the value. For example:
 
 ```kotlin
-val (privateKey, publicKey) = CryptoUtil.generateKeyPair(KeyType.ECDSA)
+val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection)
     .getOrElse {
-        log.error { "Could not generate new key pair. ${errorMessage(it)}" }
+        log.error { "Error selecting protocol: ${errorMessage(it)}" }
         return Err(it)
     }
 ```
@@ -35,7 +38,7 @@ In the examples below `OnFailure` is used as a convenience, but other methods ca
 If you would like to throw the Error instead, do:
 
 ```kotlin
-val (privateKey, publicKey) = CryptoUtil.generateKeyPair(KeyType.ECDSA).getOrThrow()
+val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection).getOrThrow()
 ```
 
 This will return the key pair when no error occurred, and throws an `Error` exception when an error occurred. 
@@ -45,7 +48,9 @@ This will return the key pair when no error occurred, and throws an `Error` exce
 This project has three sub-modules:
 
 git submodule add https://github.com/multiformats/multicodec src/main/kotlin/org/erwinkok/multiformat/spec/multicodec
+
 git submodule add https://github.com/multiformats/multibase src/main/kotlin/org/erwinkok/multiformat/spec/multibase
+
 git submodule add https://github.com/multiformats/multihash src/main/kotlin/org/erwinkok/multiformat/spec/multihash
 
 ## Contributing
