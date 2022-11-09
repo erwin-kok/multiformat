@@ -25,6 +25,7 @@ private fun writeEnumFile(codecs: List<Codec>) {
     val writer = File("Multicodec.kt").bufferedWriter()
     writer.appendLine(
         """
+// Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 //
 // GENERATED FILE -- DO NOT EDIT!!
 //
@@ -90,6 +91,7 @@ private fun writeTagFile(distinct: List<String>) {
     val writer = File("MulticodecTag.kt").bufferedWriter()
     writer.appendLine(
         """
+// Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 //
 // GENERATED FILE -- DO NOT EDIT!!
 //
