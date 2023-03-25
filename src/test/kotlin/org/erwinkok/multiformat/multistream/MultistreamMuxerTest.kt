@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MultistreamMuxerTest {
-    private val connection = TestTransportConnection()
+    private val connection = TestUtf8Connection()
     private val localConnection = connection.local
     private val remoteConnection = connection.remote
     private val muxer = MultistreamMuxer<Utf8Connection>()

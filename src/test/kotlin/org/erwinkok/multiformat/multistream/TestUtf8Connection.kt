@@ -16,7 +16,7 @@ import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
 import org.erwinkok.result.map
 
-class TestTransportConnection {
+class TestUtf8Connection {
     private val input: ByteChannel = ByteChannel(true)
     private val output: ByteChannel = ByteChannel(true)
 
@@ -25,7 +25,7 @@ class TestTransportConnection {
 
     inner class Inner(
         val input: ByteChannel,
-        val output: ByteChannel
+        val output: ByteChannel,
     ) : Utf8Connection {
         override val availableForRead: Int
             get() = input.availableForRead
@@ -65,7 +65,7 @@ class TestTransportConnection {
             return Ok(Unit)
         }
 
-        override suspend fun close() {
+        override fun close() {
             input.cancel()
             output.close()
         }
