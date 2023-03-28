@@ -17,8 +17,8 @@ import org.erwinkok.result.Result
 import org.erwinkok.result.map
 
 class TestUtf8Connection {
-    private val input: ByteChannel = ByteChannel(true)
-    private val output: ByteChannel = ByteChannel(true)
+    private val input = ByteChannel(true)
+    private val output = ByteChannel(true)
 
     val local = Inner(input, output)
     val remote = Inner(output, input)
@@ -27,9 +27,6 @@ class TestUtf8Connection {
         val input: ByteChannel,
         val output: ByteChannel,
     ) : Utf8Connection {
-        override val availableForRead: Int
-            get() = input.availableForRead
-
         override suspend fun readUtf8(): Result<String> {
             return readUnsignedVarInt()
                 .map { it.toInt() }

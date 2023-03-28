@@ -29,7 +29,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.1.1-SNAPSHOT"
+version = "0.1.2-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -89,9 +89,9 @@ tasks {
         @Suppress("SpellCheckingInspection")
         options.compilerArgs.addAll(
             listOf(
-                "-Xlint:all,-overloads,-rawtypes,-unchecked,-cast"
+                "-Xlint:all,-overloads,-rawtypes,-unchecked,-cast",
                 // "-Werror"
-            )
+            ),
         )
         sourceCompatibility = "11"
         targetCompatibility = "11"
@@ -126,7 +126,7 @@ kover {
             classes {
                 excludes += listOf(
                     "org.erwinkok.multiformat.multicodec.Codec",
-                    "org.erwinkok.multiformat.multicodec.GenerateKt*"
+                    "org.erwinkok.multiformat.multicodec.GenerateKt*",
                 )
             }
         }

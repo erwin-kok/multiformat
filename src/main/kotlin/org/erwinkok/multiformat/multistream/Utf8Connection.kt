@@ -5,7 +5,6 @@ import io.ktor.utils.io.core.Closeable
 import org.erwinkok.result.Result
 
 interface Utf8Connection : Closeable {
-    val availableForRead: Int
     suspend fun readUtf8(): Result<String>
     suspend fun writeUtf8(vararg messages: String): Result<Unit>
 }

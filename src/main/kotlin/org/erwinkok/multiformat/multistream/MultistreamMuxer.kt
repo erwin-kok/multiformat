@@ -26,19 +26,15 @@ class MultistreamMuxer<T : Utf8Connection> {
         connection.writeUtf8(LS)
             .onFailure { return Err(it) }
         val result = mutableListOf<String>()
-        while (true) {
-            val token = readNextToken(connection)
-                .getOrElse {
-                    if (it == Errors.EndOfStream) {
-                        return Ok(result)
-                    }
-                    return Err(it)
+        val token = readNextToken(connection)
+            .getOrElse {
+                if (it == Errors.EndOfStream) {
+                    return Ok(result)
                 }
-            result.addAll(token.split('\n').map { it.trim() })
-            if (connection.availableForRead == 0) {
-                return Ok(result)
+                return Err(it)
             }
-        }
+        result.addAll(token.split('\n').map { it.trim() })
+        return Ok(result)
     }
 
     suspend fun negotiate(connection: T): Result<ProtocolHandlerInfo<T>> {
