@@ -80,7 +80,7 @@ class TestUtf8Connection {
 
         private suspend fun readByte(): Result<UByte> {
             return try {
-                Ok(input.readPacket(1).readByte().toUByte())
+                Ok(input.readByte().toUByte())
             } catch (e: ClosedReceiveChannelException) {
                 Err(Errors.EndOfStream)
             }

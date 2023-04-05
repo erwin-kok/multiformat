@@ -78,21 +78,21 @@ class MultistreamMuxer<T : Utf8Connection> {
             }
     }
 
-    fun addHandler(protocol: String) {
-        addHandlerWithFunc(protocol, { anObject: String -> protocol == anObject }, null)
+    fun addHandler(protocol: ProtocolId) {
+        addHandlerWithFunc(protocol, { it == protocol }, null)
     }
 
-    fun addHandler(protocol: String, handler: suspend (protocol: String, stream: T) -> Result<Unit>) {
-        addHandlerWithFunc(protocol, { anObject: String -> protocol == anObject }, handler)
+    fun addHandler(protocol: ProtocolId, handler: suspend (protocol: ProtocolId, stream: T) -> Result<Unit>) {
+        addHandlerWithFunc(protocol, { it == protocol }, handler)
     }
 
-    fun addHandlerWithFunc(protocol: String, match: (String) -> Boolean, handler: (suspend (protocol: String, stream: T) -> Result<Unit>)?) {
+    fun addHandlerWithFunc(protocol: ProtocolId, match: (ProtocolId) -> Boolean, handler: (suspend (protocol: ProtocolId, stream: T) -> Result<Unit>)?) {
         handlerLock.withLock {
             handlers.add(ProtocolHandlerInfo(match, protocol, handler))
         }
     }
 
-    fun removeHandler(protocol: String) {
+    fun removeHandler(protocol: ProtocolId) {
         handlerLock.withLock {
             handlers.removeIf { it.protocol == protocol }
         }
@@ -102,7 +102,7 @@ class MultistreamMuxer<T : Utf8Connection> {
         handlers.clear()
     }
 
-    fun protocols(): Set<String> {
+    fun protocols(): Set<ProtocolId> {
         handlerLock.withLock {
             return handlers.map { it.protocol }.toSet()
         }
@@ -111,14 +111,15 @@ class MultistreamMuxer<T : Utf8Connection> {
     private suspend fun sendList(connection: Utf8Connection): Result<Unit> {
         handlerLock.withLock {
             for (handler in handlers) {
-                connection.writeUtf8(handler.protocol)
+                connection.writeUtf8(handler.protocol.id)
                     .onFailure { return Err(it) }
             }
         }
         return Ok(Unit)
     }
 
-    private fun findHandler(protocol: String): ProtocolHandlerInfo<T>? {
+    private fun findHandler(token: String): ProtocolHandlerInfo<T>? {
+        val protocol = ProtocolId.from(token)
         handlerLock.withLock {
             for (handler in handlers) {
                 if (handler.match(protocol)) {
@@ -148,7 +149,7 @@ class MultistreamMuxer<T : Utf8Connection> {
         private val ErrNotSupported = Error("Peer does not support any of the given protocols")
         private val ErrIncorrectVersion = Error("client connected with incorrect version")
 
-        suspend fun selectOneOf(protocols: Set<String>, connection: Utf8Connection): Result<String> {
+        suspend fun selectOneOf(protocols: Set<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             if (protocols.isEmpty()) {
                 return Err(ErrNoProtocols)
             }
@@ -164,20 +165,20 @@ class MultistreamMuxer<T : Utf8Connection> {
             return selectProtosOrFail(protoList, connection)
         }
 
-        suspend fun selectProtoOrFail(protocol: String, connection: Utf8Connection): Result<Unit> {
-            connection.writeUtf8(PROTOCOL_ID, protocol)
+        suspend fun selectProtoOrFail(protocol: ProtocolId, connection: Utf8Connection): Result<Unit> {
+            connection.writeUtf8(PROTOCOL_ID, protocol.id)
                 .onFailure { return Err(it) }
             readMultistreamHeader(connection)
                 .onFailure { return Err(it) }
             return readProto(protocol, connection)
         }
 
-        suspend fun selectWithSimopenOrFail(protocols: Set<String>, connection: Utf8Connection): Result<SimOpenInfo> {
+        suspend fun selectWithSimopenOrFail(protocols: Set<ProtocolId>, connection: Utf8Connection): Result<SimOpenInfo> {
             if (protocols.isEmpty()) {
                 return Err(ErrNoProtocols)
             }
             val protoList = protocols.toMutableList()
-            connection.writeUtf8(PROTOCOL_ID, simOpenProtocol, protoList[0])
+            connection.writeUtf8(PROTOCOL_ID, simOpenProtocol, protoList[0].id)
                 .onFailure { return Err(it) }
             readMultistreamHeader(connection)
                 .onFailure { return Err(it) }
@@ -193,7 +194,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             return Err("unexpected response: $token")
         }
 
-        private suspend fun selectProtosOrFail(protocols: List<String>, connection: Utf8Connection): Result<String> {
+        private suspend fun selectProtosOrFail(protocols: List<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             for (protocol in protocols) {
                 trySelect(protocol, connection)
                     .onSuccess {
@@ -208,12 +209,12 @@ class MultistreamMuxer<T : Utf8Connection> {
             return Err(ErrNotSupported)
         }
 
-        private suspend fun clientOpen(protocols: List<String>, connection: Utf8Connection): Result<String> {
+        private suspend fun clientOpen(protocols: List<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             val token = readNextToken(connection)
                 .getOrElse { return Err(it) }
             val protoList = protocols.toMutableList()
             val firstProto = protoList.removeAt(0)
-            if (token == firstProto) {
+            if (token == firstProto.id) {
                 return Ok(firstProto)
             } else if (token == NA) {
                 return selectProtosOrFail(protoList, connection)
@@ -221,7 +222,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             return Err("unexpected response: $token")
         }
 
-        private suspend fun simOpen(protocols: List<String>, connection: Utf8Connection): Result<SimOpenInfo> {
+        private suspend fun simOpen(protocols: List<ProtocolId>, connection: Utf8Connection): Result<SimOpenInfo> {
             val randBytes = ByteArray(8)
             Random().nextBytes(randBytes)
             val myNonce = toLong(randBytes)
@@ -251,7 +252,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             }
         }
 
-        private suspend fun simOpenSelectServer(protocols: List<String>, connection: Utf8Connection): Result<String> {
+        private suspend fun simOpenSelectServer(protocols: List<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             connection.writeUtf8(responder)
                 .onFailure { return Err(it) }
             val token = readNextToken(connection)
@@ -268,8 +269,8 @@ class MultistreamMuxer<T : Utf8Connection> {
                         return Err(it)
                     }
                 for (protocol in protocols) {
-                    if (nextToken == protocol) {
-                        connection.writeUtf8(protocol)
+                    if (nextToken == protocol.id) {
+                        connection.writeUtf8(protocol.id)
                             .onFailure { return Err(it) }
                         return Ok(protocol)
                     }
@@ -279,7 +280,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             }
         }
 
-        private suspend fun simOpenSelectClient(protocols: List<String>, connection: Utf8Connection): Result<String> {
+        private suspend fun simOpenSelectClient(protocols: List<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             connection.writeUtf8(initiator)
                 .onFailure { return Err(it) }
             val token = readNextToken(connection)
@@ -299,16 +300,16 @@ class MultistreamMuxer<T : Utf8Connection> {
             return Ok(Unit)
         }
 
-        private suspend fun trySelect(protocol: String, connection: Utf8Connection): Result<Unit> {
-            connection.writeUtf8(protocol)
+        private suspend fun trySelect(protocol: ProtocolId, connection: Utf8Connection): Result<Unit> {
+            connection.writeUtf8(protocol.id)
                 .onFailure { return Err(it) }
             return readProto(protocol, connection)
         }
 
-        private suspend fun readProto(protocol: String, connection: Utf8Connection): Result<Unit> {
+        private suspend fun readProto(protocol: ProtocolId, connection: Utf8Connection): Result<Unit> {
             val token = readNextToken(connection)
                 .getOrElse { return Err(it) }
-            if (token == protocol) {
+            if (token == protocol.id) {
                 return Ok(Unit)
             } else if (token == NA) {
                 return Err(ErrNotSupported)

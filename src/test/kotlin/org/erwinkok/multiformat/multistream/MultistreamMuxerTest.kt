@@ -43,15 +43,15 @@ internal class MultistreamMuxerTest {
     fun selectOneOf() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "/proto1"
+            "/proto1",
         )
 
-        val selectOneResult = MultistreamMuxer.selectOneOf(setOf("/proto1"), localConnection).expectNoErrors()
-        assertEquals("/proto1", selectOneResult)
+        val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.from("/proto1")), localConnection).expectNoErrors()
+        assertEquals("/proto1", selectOneResult.id)
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto1"
+            "/proto1",
         )
     }
 
@@ -61,17 +61,26 @@ internal class MultistreamMuxerTest {
             "/multistream/1.0.0",
             "na",
             "na",
-            "/proto3"
+            "/proto3",
         )
 
-        val selectOneResult = MultistreamMuxer.selectOneOf(setOf("/proto1", "/proto2", "/proto3", "/proto4", "/proto5"), localConnection).expectNoErrors()
-        assertEquals("/proto3", selectOneResult)
+        val selectOneResult = MultistreamMuxer.selectOneOf(
+            setOf(
+                ProtocolId.from("/proto1"),
+                ProtocolId.from("/proto2"),
+                ProtocolId.from("/proto3"),
+                ProtocolId.from("/proto4"),
+                ProtocolId.from("/proto5"),
+            ),
+            localConnection,
+        ).expectNoErrors()
+        assertEquals("/proto3", selectOneResult.id)
 
         remoteReceived(
             "/multistream/1.0.0",
             "/proto1",
             "/proto2",
-            "/proto3"
+            "/proto3",
         )
     }
 
@@ -79,15 +88,15 @@ internal class MultistreamMuxerTest {
     fun selectOneOfNA() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "na"
+            "na",
         )
 
-        val selectOneResult = MultistreamMuxer.selectOneOf(setOf("/proto2"), localConnection)
+        val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.from("/proto2")), localConnection)
         assertEquals(Error("Peer does not support any of the given protocols"), selectOneResult.getError())
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto2"
+            "/proto2",
         )
     }
 
@@ -95,17 +104,17 @@ internal class MultistreamMuxerTest {
     fun negotiateMatchNoHandler() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "/proto3"
+            "/proto3",
         )
 
-        muxer.addHandler("/proto3")
+        muxer.addHandler(ProtocolId.from("/proto3"))
         val negotiateResult = muxer.negotiate(localConnection).expectNoErrors()
-        assertEquals("/proto3", negotiateResult.protocol)
+        assertEquals("/proto3", negotiateResult.protocol.id)
         assertEquals(null, negotiateResult.handler)
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto3"
+            "/proto3",
         )
     }
 
@@ -114,25 +123,25 @@ internal class MultistreamMuxerTest {
         runTest {
             remoteSends(
                 "/multistream/1.0.0",
-                "/proto4"
+                "/proto4",
             )
 
             var hit = false
-            muxer.addHandler("/proto4") { protocol, connection ->
-                assertEquals("AProtocol", protocol)
+            muxer.addHandler(ProtocolId.from("/proto4")) { protocol, connection ->
+                assertEquals("AProtocol", protocol.id)
                 assertSame(remoteConnection, connection)
                 hit = true
                 Ok(Unit)
             }
             val negotiateResult = muxer.negotiate(localConnection).expectNoErrors()
-            assertEquals("/proto4", negotiateResult.protocol)
+            assertEquals("/proto4", negotiateResult.protocol.id)
             assertNotNull(negotiateResult.handler)
-            negotiateResult.handler?.invoke("AProtocol", remoteConnection)
+            negotiateResult.handler?.invoke(ProtocolId.from("AProtocol"), remoteConnection)
             assertTrue(hit)
 
             remoteReceived(
                 "/multistream/1.0.0",
-                "/proto4"
+                "/proto4",
             )
         }
     }
@@ -142,7 +151,7 @@ internal class MultistreamMuxerTest {
         runTest {
             remoteSends(
                 "/multistream/1.0.0",
-                "/proto1\n/proto2\n/proto3/sub-proto\n"
+                "/proto1\n/proto2\n/proto3/sub-proto\n",
             )
 
             val listResult = muxer.list(localConnection).expectNoErrors()
@@ -150,7 +159,7 @@ internal class MultistreamMuxerTest {
 
             remoteReceived(
                 "/multistream/1.0.0",
-                "ls"
+                "ls",
             )
         }
     }
@@ -158,65 +167,72 @@ internal class MultistreamMuxerTest {
     @Test
     fun protocolNegotiation() = runTest {
         val mux = MultistreamMuxer<Utf8Connection>()
-        mux.addHandler("/a")
-        mux.addHandler("/b")
-        mux.addHandler("/c")
+        mux.addHandler(ProtocolId.from("/a"))
+        mux.addHandler(ProtocolId.from("/b"))
+        mux.addHandler(ProtocolId.from("/c"))
         val job = launch {
             val selected = mux.negotiate(localConnection).expectNoErrors()
-            assertEquals("/a", selected.protocol, "incorrect protocol selected")
+            assertEquals("/a", selected.protocol.id, "incorrect protocol selected")
         }
-        MultistreamMuxer.selectProtoOrFail("/a", remoteConnection).expectNoErrors()
+        MultistreamMuxer.selectProtoOrFail(ProtocolId.from("/a"), remoteConnection).expectNoErrors()
         job.join()
     }
 
     @Test
     fun selectOne() = runTest {
-        muxer.addHandler("/a")
-        muxer.addHandler("/b")
-        muxer.addHandler("/c")
+        muxer.addHandler(ProtocolId.from("/a"))
+        muxer.addHandler(ProtocolId.from("/b"))
+        muxer.addHandler(ProtocolId.from("/c"))
         val job = launch {
             val selected = muxer.negotiate(localConnection).expectNoErrors()
-            assertEquals("/c", selected.protocol, "incorrect protocol selected")
+            assertEquals("/c", selected.protocol.id, "incorrect protocol selected")
         }
-        val selected = MultistreamMuxer.selectOneOf(setOf("/d", "/e", "/c"), remoteConnection).expectNoErrors()
-        assertEquals("/c", selected, "incorrect protocol selected")
+        val selected = MultistreamMuxer.selectOneOf(
+            setOf(
+                ProtocolId.from("/d"),
+                ProtocolId.from("/e"),
+                ProtocolId.from("/c"),
+            ),
+            remoteConnection,
+        ).expectNoErrors()
+        assertEquals("/c", selected.id, "incorrect protocol selected")
         job.join()
     }
 
     @Test
     fun selectFails() = runTest {
-        muxer.addHandler("/a")
-        muxer.addHandler("/b")
-        muxer.addHandler("/c")
+        muxer.addHandler(ProtocolId.from("/a"))
+        muxer.addHandler(ProtocolId.from("/b"))
+        muxer.addHandler(ProtocolId.from("/c"))
         val job = launch {
             muxer.negotiate(localConnection)
             localConnection.close()
         }
-        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectOneOf(setOf("/d", "/e"), remoteConnection) }
+        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectOneOf(setOf(ProtocolId.from("/d"), ProtocolId.from("/e")), remoteConnection) }
         remoteConnection.close()
         job.join()
     }
 
     @Test
     fun removeProtocol() = runTest {
-        muxer.addHandler("/a")
-        muxer.addHandler("/b")
-        muxer.addHandler("/c")
-        assertEquals(listOf("/a", "/b", "/c"), muxer.protocols().sorted())
-        muxer.removeHandler("/b")
-        assertEquals(listOf("/a", "/c"), muxer.protocols().sorted())
+        muxer.addHandler(ProtocolId.from("/a"))
+        muxer.addHandler(ProtocolId.from("/b"))
+        muxer.addHandler(ProtocolId.from("/c"))
+        assertEquals(listOf("/a", "/b", "/c"), muxer.protocols().map { it.id }.sorted())
+        muxer.removeHandler(ProtocolId.from("/b"))
+        assertEquals(listOf("/a", "/c"), muxer.protocols().map { it.id }.sorted())
     }
 
     @Test
     fun handleFunc() = runTest {
-        muxer.addHandler("/a")
-        muxer.addHandler("/b")
-        muxer.addHandler("/c") { p, _ ->
-            assertEquals("/c", p, "incorrect protocol selected")
+        muxer.addHandler(ProtocolId.from("/a"))
+        muxer.addHandler(ProtocolId.from("/b"))
+        muxer.addHandler(ProtocolId.from("/c")) { p, _ ->
+            assertEquals(ProtocolId.from("/c"), p, "incorrect protocol selected")
             Ok(Unit)
         }
         val job = launch {
-            MultistreamMuxer.selectProtoOrFail("/c", localConnection).expectNoErrors()
+            MultistreamMuxer.selectProtoOrFail(ProtocolId.from("/c"), localConnection).expectNoErrors()
         }
         muxer.handle(this, remoteConnection).expectNoErrors()
         job.join()
@@ -224,24 +240,24 @@ internal class MultistreamMuxerTest {
 
     @Test
     fun simOpenClientServer() = runTest {
-        muxer.addHandler("/a")
+        muxer.addHandler(ProtocolId.from("/a"))
         val job = launch {
             val selected = muxer.negotiate(localConnection).expectNoErrors()
-            assertEquals("/a", selected.protocol, "incorrect protocol selected")
+            assertEquals("/a", selected.protocol.id, "incorrect protocol selected")
         }
-        val simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf("/a"), remoteConnection).expectNoErrors()
-        assertEquals("/a", simOpenInfo.protocol, "incorrect protocol selected")
+        val simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/a")), remoteConnection).expectNoErrors()
+        assertEquals("/a", simOpenInfo.protocol.id, "incorrect protocol selected")
         assertFalse(simOpenInfo.server)
         job.join()
     }
 
     @Test
     fun simOpenClientServerFail() = runTest {
-        muxer.addHandler("/a")
+        muxer.addHandler(ProtocolId.from("/a"))
         launch {
             coAssertErrorResult("EndOfStream") { muxer.negotiate(localConnection) }
         }
-        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf("/b"), remoteConnection) }
+        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/b")), remoteConnection) }
         remoteConnection.close()
     }
 
@@ -249,11 +265,11 @@ internal class MultistreamMuxerTest {
     fun simOpenClientClient() = runTest {
         var simOpenInfo: SimOpenInfo? = null
         val job = launch {
-            simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf("/a"), remoteConnection).expectNoErrors()
-            assertEquals("/a", simOpenInfo!!.protocol, "incorrect protocol selected")
+            simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/a")), remoteConnection).expectNoErrors()
+            assertEquals("/a", simOpenInfo!!.protocol.id, "incorrect protocol selected")
         }
-        val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf("/a"), localConnection).expectNoErrors()
-        assertEquals("/a", simOpenInfo2.protocol, "incorrect protocol selected")
+        val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/a")), localConnection).expectNoErrors()
+        assertEquals("/a", simOpenInfo2.protocol.id, "incorrect protocol selected")
         job.join()
         assertNotEquals(simOpenInfo!!.server, simOpenInfo2.server)
     }
@@ -262,11 +278,11 @@ internal class MultistreamMuxerTest {
     fun simOpenClientClient2() = runTest {
         var simOpenInfo: SimOpenInfo? = null
         val job = launch {
-            simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf("/a", "/b"), remoteConnection).expectNoErrors()
-            assertEquals("/b", simOpenInfo!!.protocol, "incorrect protocol selected")
+            simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/a"), ProtocolId.from("/b")), remoteConnection).expectNoErrors()
+            assertEquals("/b", simOpenInfo!!.protocol.id, "incorrect protocol selected")
         }
-        val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf("/b"), localConnection).expectNoErrors()
-        assertEquals("/b", simOpenInfo2.protocol, "incorrect protocol selected")
+        val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/b")), localConnection).expectNoErrors()
+        assertEquals("/b", simOpenInfo2.protocol.id, "incorrect protocol selected")
         job.join()
         assertNotEquals(simOpenInfo!!.server, simOpenInfo2.server)
     }
@@ -274,10 +290,10 @@ internal class MultistreamMuxerTest {
     @Test
     fun simOpenClientClientFail() = runTest {
         val job = launch {
-            coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf("/a"), remoteConnection) }
+            coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/a")), remoteConnection) }
             remoteConnection.close()
         }
-        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf("/b"), localConnection) }
+        coAssertErrorResult("Peer does not support any of the given protocols") { MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.from("/b")), localConnection) }
         localConnection.close()
         job.join()
     }
