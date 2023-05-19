@@ -7,13 +7,14 @@ import org.gradle.api.tasks.testing.logging.TestStackTraceFilter
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.8.21"
     `java-library`
     `java-test-fixtures`
     signing
     `maven-publish`
 
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.3"
+    id("com.github.ben-manes.versions") version "0.46.0"
 
     alias(libs.plugins.build.kover)
     alias(libs.plugins.build.ktlint)
@@ -29,7 +30,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.2.0-SNAPSHOT"
+version = "0.3.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -89,9 +90,8 @@ tasks {
         @Suppress("SpellCheckingInspection")
         options.compilerArgs.addAll(
             listOf(
-                "-Xlint:all,-overloads,-rawtypes,-unchecked,-cast",
-                // "-Werror"
-            ),
+                "-Xlint:all,-overloads,-rawtypes,-unchecked,-cast"
+            )
         )
         sourceCompatibility = "11"
         targetCompatibility = "11"
@@ -119,22 +119,17 @@ sourceSets {
     }
 }
 
-kover {
-    htmlReport {
-        onCheck.set(true)
-        overrideFilters {
-            classes {
-                excludes += listOf(
+koverReport {
+    defaults {
+        filters {
+            excludes {
+                classes(
                     "org.erwinkok.multiformat.multicodec.Codec",
-                    "org.erwinkok.multiformat.multicodec.GenerateKt*",
+                    "org.erwinkok.multiformat.multicodec.GenerateKt*"
                 )
             }
         }
     }
-}
-
-koverMerged {
-    enable()
 }
 
 publishing {

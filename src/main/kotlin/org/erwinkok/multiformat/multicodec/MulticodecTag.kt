@@ -6,7 +6,9 @@ package org.erwinkok.multiformat.multicodec
 
 enum class MulticodecTag {
     Cid,
+    Encryption,
     Filecoin,
+    Hash,
     Holochain,
     Ipld,
     Key,

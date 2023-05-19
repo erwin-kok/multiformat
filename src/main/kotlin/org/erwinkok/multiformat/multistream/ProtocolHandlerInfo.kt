@@ -6,5 +6,5 @@ import org.erwinkok.result.Result
 data class ProtocolHandlerInfo<T : Utf8Connection>(
     val match: (ProtocolId) -> Boolean,
     val protocol: ProtocolId,
-    val handler: (suspend (protocol: ProtocolId, stream: T) -> Result<Unit>)? = null,
+    val handler: (suspend (protocol: ProtocolId, stream: T) -> Result<Unit>)? = null
 )

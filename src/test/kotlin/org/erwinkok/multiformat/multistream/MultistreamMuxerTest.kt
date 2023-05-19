@@ -43,7 +43,7 @@ internal class MultistreamMuxerTest {
     fun selectOneOf() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "/proto1",
+            "/proto1"
         )
 
         val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.from("/proto1")), localConnection).expectNoErrors()
@@ -51,7 +51,7 @@ internal class MultistreamMuxerTest {
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto1",
+            "/proto1"
         )
     }
 
@@ -61,7 +61,7 @@ internal class MultistreamMuxerTest {
             "/multistream/1.0.0",
             "na",
             "na",
-            "/proto3",
+            "/proto3"
         )
 
         val selectOneResult = MultistreamMuxer.selectOneOf(
@@ -70,9 +70,9 @@ internal class MultistreamMuxerTest {
                 ProtocolId.from("/proto2"),
                 ProtocolId.from("/proto3"),
                 ProtocolId.from("/proto4"),
-                ProtocolId.from("/proto5"),
+                ProtocolId.from("/proto5")
             ),
-            localConnection,
+            localConnection
         ).expectNoErrors()
         assertEquals("/proto3", selectOneResult.id)
 
@@ -80,7 +80,7 @@ internal class MultistreamMuxerTest {
             "/multistream/1.0.0",
             "/proto1",
             "/proto2",
-            "/proto3",
+            "/proto3"
         )
     }
 
@@ -88,7 +88,7 @@ internal class MultistreamMuxerTest {
     fun selectOneOfNA() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "na",
+            "na"
         )
 
         val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.from("/proto2")), localConnection)
@@ -96,7 +96,7 @@ internal class MultistreamMuxerTest {
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto2",
+            "/proto2"
         )
     }
 
@@ -104,7 +104,7 @@ internal class MultistreamMuxerTest {
     fun negotiateMatchNoHandler() = runTest {
         remoteSends(
             "/multistream/1.0.0",
-            "/proto3",
+            "/proto3"
         )
 
         muxer.addHandler(ProtocolId.from("/proto3"))
@@ -114,7 +114,7 @@ internal class MultistreamMuxerTest {
 
         remoteReceived(
             "/multistream/1.0.0",
-            "/proto3",
+            "/proto3"
         )
     }
 
@@ -123,7 +123,7 @@ internal class MultistreamMuxerTest {
         runTest {
             remoteSends(
                 "/multistream/1.0.0",
-                "/proto4",
+                "/proto4"
             )
 
             var hit = false
@@ -141,7 +141,7 @@ internal class MultistreamMuxerTest {
 
             remoteReceived(
                 "/multistream/1.0.0",
-                "/proto4",
+                "/proto4"
             )
         }
     }
@@ -151,7 +151,7 @@ internal class MultistreamMuxerTest {
         runTest {
             remoteSends(
                 "/multistream/1.0.0",
-                "/proto1\n/proto2\n/proto3/sub-proto\n",
+                "/proto1\n/proto2\n/proto3/sub-proto\n"
             )
 
             val listResult = muxer.list(localConnection).expectNoErrors()
@@ -159,7 +159,7 @@ internal class MultistreamMuxerTest {
 
             remoteReceived(
                 "/multistream/1.0.0",
-                "ls",
+                "ls"
             )
         }
     }
@@ -191,9 +191,9 @@ internal class MultistreamMuxerTest {
             setOf(
                 ProtocolId.from("/d"),
                 ProtocolId.from("/e"),
-                ProtocolId.from("/c"),
+                ProtocolId.from("/c")
             ),
-            remoteConnection,
+            remoteConnection
         ).expectNoErrors()
         assertEquals("/c", selected.id, "incorrect protocol selected")
         job.join()

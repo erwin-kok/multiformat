@@ -372,7 +372,7 @@ internal class ComponentsTest {
             ),
             Tuple3(
                 "/ip4/127.0.0.1/udp/1234/webrtc",
-                "047F000001910204D29802",
+                "047F000001910204D29902",
                 listOf(
                     Ip4Component.fromIPv4Address(local).expectNoErrors(),
                     PortComponent.fromString(Protocol.UDP, "1234").expectNoErrors(),
@@ -382,7 +382,7 @@ internal class ComponentsTest {
 
             Tuple3(
                 "/ip4/127.0.0.1/udp/1234/webrtc/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g",
-                "047F000001910204D29802D203221220C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2",
+                "047F000001910204D29902D203221220C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2",
                 listOf(
                     Ip4Component.fromIPv4Address(local).expectNoErrors(),
                     PortComponent.fromString(Protocol.UDP, "1234").expectNoErrors(),
