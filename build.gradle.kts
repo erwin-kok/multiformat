@@ -30,7 +30,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.3.0-SNAPSHOT"
+version = "0.3.1-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11

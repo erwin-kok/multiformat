@@ -1,9 +1,9 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multistream
 
-import kotlinx.atomicfu.locks.ReentrantLock
-import kotlinx.atomicfu.locks.withLock
+import io.ktor.util.collections.ConcurrentSet
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.erwinkok.result.Err
 import org.erwinkok.result.Error
@@ -17,8 +17,7 @@ import org.erwinkok.result.onSuccess
 import java.util.Random
 
 class MultistreamMuxer<T : Utf8Connection> {
-    private val handlerLock = ReentrantLock()
-    private val handlers = mutableListOf<ProtocolHandlerInfo<T>>()
+    private val handlers = ConcurrentSet<ProtocolHandlerInfo<T>>()
 
     suspend fun list(connection: T): Result<List<String>> {
         handshake(connection)
@@ -52,7 +51,8 @@ class MultistreamMuxer<T : Utf8Connection> {
                     return Err(it)
                 }
             if (nextToken == LS) {
-                sendList(connection)
+                val list = protocols().joinToString("\n") { protocolId -> protocolId.id }
+                connection.writeUtf8(list)
                     .onFailure { return Err(it) }
             } else {
                 val handler = findHandler(nextToken)
@@ -68,7 +68,7 @@ class MultistreamMuxer<T : Utf8Connection> {
         }
     }
 
-    suspend fun handle(scope: CoroutineScope, connection: T): Result<Unit> {
+    suspend fun handle(scope: CoroutineScope, connection: T): Result<Job> {
         return negotiate(connection)
             .map { negotiateResult ->
                 val handler = negotiateResult.handler ?: return Err("No Handler registered for ${negotiateResult.protocol}")
@@ -87,15 +87,11 @@ class MultistreamMuxer<T : Utf8Connection> {
     }
 
     fun addHandlerWithFunc(protocol: ProtocolId, match: (ProtocolId) -> Boolean, handler: (suspend (protocol: ProtocolId, stream: T) -> Result<Unit>)?) {
-        handlerLock.withLock {
-            handlers.add(ProtocolHandlerInfo(match, protocol, handler))
-        }
+        handlers.add(ProtocolHandlerInfo(match, protocol, handler))
     }
 
     fun removeHandler(protocol: ProtocolId) {
-        handlerLock.withLock {
-            handlers.removeIf { it.protocol == protocol }
-        }
+        handlers.removeIf { it.protocol == protocol }
     }
 
     fun clearHandlers() {
@@ -103,28 +99,14 @@ class MultistreamMuxer<T : Utf8Connection> {
     }
 
     fun protocols(): Set<ProtocolId> {
-        handlerLock.withLock {
-            return handlers.map { it.protocol }.toSet()
-        }
-    }
-
-    private suspend fun sendList(connection: Utf8Connection): Result<Unit> {
-        handlerLock.withLock {
-            for (handler in handlers) {
-                connection.writeUtf8(handler.protocol.id)
-                    .onFailure { return Err(it) }
-            }
-        }
-        return Ok(Unit)
+        return handlers.map { it.protocol }.toSet()
     }
 
     private fun findHandler(token: String): ProtocolHandlerInfo<T>? {
         val protocol = ProtocolId.from(token)
-        handlerLock.withLock {
-            for (handler in handlers) {
-                if (handler.match(protocol)) {
-                    return handler
-                }
+        for (handler in handlers) {
+            if (handler.match(protocol)) {
+                return handler
             }
         }
         return null

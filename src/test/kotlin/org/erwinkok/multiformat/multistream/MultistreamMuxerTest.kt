@@ -234,8 +234,9 @@ internal class MultistreamMuxerTest {
         val job = launch {
             MultistreamMuxer.selectProtoOrFail(ProtocolId.from("/c"), localConnection).expectNoErrors()
         }
-        muxer.handle(this, remoteConnection).expectNoErrors()
+        val job2 = muxer.handle(this, remoteConnection).expectNoErrors()
         job.join()
+        job2.join()
     }
 
     @Test
