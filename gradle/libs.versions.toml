@@ -2,17 +2,20 @@
 kotlinx-coroutines = "1.7.1"
 kotlinx-atomicfu = "0.20.2"
 kotlin-logging = "3.0.5"
-junit-jupiter = "5.9.2"
+junit-jupiter = "5.9.3"
 
 kotlin = "1.8.21"
-kover-plugin = "0.7.0"
+kover-plugin = "0.7.0-Alpha"
 ktlint-plugin = "11.3.2"
 nexus-plugin = "1.3.0"
+versions-plugin = "0.46.0"
+testlogger-plugin = "3.2.0"
+protobuf-plugin = "0.9.3"
 
 ipaddress = "5.4.0"
 ktor = "2.3.0"
 
-result-monad = "1.1.0-SNAPSHOT"
+result-monad = "1.2.0"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -35,3 +38,6 @@ build-kotlin = { id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref =
 build-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover-plugin" }
 build-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 build-nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus-plugin" }
+build-versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
+build-testlogger = { id = "com.adarshr.test-logger", version.ref = "testlogger-plugin" }
+build-protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }

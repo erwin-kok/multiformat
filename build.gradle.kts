@@ -1,9 +1,7 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.api.tasks.testing.logging.TestStackTraceFilter
+import com.adarshr.gradle.testlogger.theme.ThemeType
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -13,12 +11,12 @@ plugins {
     signing
     `maven-publish`
 
-    id("com.google.protobuf") version "0.9.3"
-    id("com.github.ben-manes.versions") version "0.46.0"
-
     alias(libs.plugins.build.kover)
     alias(libs.plugins.build.ktlint)
     alias(libs.plugins.build.nexus)
+    alias(libs.plugins.build.versions)
+    alias(libs.plugins.build.testlogger)
+    alias(libs.plugins.build.protobuf)
 }
 
 repositories {
@@ -30,11 +28,11 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.3.1-SNAPSHOT"
+version = "0.4.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+    withJavadocJar()
 }
 
 dependencies {
@@ -60,55 +58,38 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
+testlogger {
+    theme = ThemeType.MOCHA
+}
+
 tasks {
-    compileKotlin {
-        println("Configuring KotlinCompile $name in project ${project.name}...")
-        kotlinOptions {
-            @Suppress("SpellCheckingInspection")
-            freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
-            allWarningsAsErrors = true
-            jvmTarget = "11"
-            languageVersion = "1.7"
-            apiVersion = "1.7"
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
-    compileTestKotlin {
-        println("Configuring KotlinTestCompile $name in project ${project.name}...")
-        kotlinOptions {
-            @Suppress("SpellCheckingInspection")
-            freeCompilerArgs = listOf("-Xjsr305=strict")
-            allWarningsAsErrors = true
-            jvmTarget = "11"
-            languageVersion = "1.7"
-            apiVersion = "1.7"
-        }
+    withType<JavaCompile>().configureEach {
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+        targetCompatibility = JavaVersion.VERSION_17.toString()
     }
 
-    compileJava {
-        println("Configuring compileJava $name in project ${project.name}...")
-        @Suppress("SpellCheckingInspection")
-        options.compilerArgs.addAll(
-            listOf(
-                "-Xlint:all,-overloads,-rawtypes,-unchecked,-cast"
-            )
-        )
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
-        options.encoding = "UTF-8"
+    withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+        rejectVersionIf {
+            isNonStable(candidate.version)
+        }
     }
 
     test {
         useJUnitPlatform()
-        testLogging {
-            events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED)
-            exceptionFormat = TestExceptionFormat.FULL
-            showExceptions = true
-            showCauses = true
-            maxGranularity = 3
-            stackTraceFilters = setOf(TestStackTraceFilter.ENTRY_POINT)
-        }
     }
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
 }
 
 sourceSets {
@@ -120,13 +101,29 @@ sourceSets {
 }
 
 koverReport {
-    defaults {
-        filters {
-            excludes {
-                classes(
-                    "org.erwinkok.multiformat.multicodec.Codec",
-                    "org.erwinkok.multiformat.multicodec.GenerateKt*"
-                )
+    filters {
+        excludes {
+            classes(
+                "org.erwinkok.multiformat.multicodec.Codec",
+                "org.erwinkok.multiformat.multicodec.GenerateKt*"
+            )
+        }
+    }
+
+    html {
+        onCheck = true
+    }
+
+    verify {
+        onCheck = true
+        rule {
+            isEnabled = true
+            entity = kotlinx.kover.gradle.plugin.dsl.GroupingEntityType.APPLICATION
+            bound {
+                minValue = 0
+                maxValue = 99
+                metric = kotlinx.kover.gradle.plugin.dsl.MetricType.LINE
+                aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
             }
         }
     }
