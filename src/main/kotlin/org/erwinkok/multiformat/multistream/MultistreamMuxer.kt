@@ -73,7 +73,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             .map { negotiateResult ->
                 val handler = negotiateResult.handler ?: return Err("No Handler registered for ${negotiateResult.protocol}")
                 scope.launch {
-                    handler(this, negotiateResult.protocol, connection)
+                    handler(negotiateResult.protocol, connection)
                 }
             }
     }
