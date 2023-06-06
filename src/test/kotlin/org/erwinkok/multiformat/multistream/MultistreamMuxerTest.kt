@@ -127,7 +127,7 @@ internal class MultistreamMuxerTest {
             )
 
             var hit = false
-            muxer.addHandler(ProtocolId.from("/proto4")) { protocol, connection ->
+            muxer.addHandler(ProtocolId.from("/proto4")) { _, protocol, connection ->
                 assertEquals("AProtocol", protocol.id)
                 assertSame(remoteConnection, connection)
                 hit = true
@@ -136,7 +136,7 @@ internal class MultistreamMuxerTest {
             val negotiateResult = muxer.negotiate(localConnection).expectNoErrors()
             assertEquals("/proto4", negotiateResult.protocol.id)
             assertNotNull(negotiateResult.handler)
-            negotiateResult.handler?.invoke(ProtocolId.from("AProtocol"), remoteConnection)
+            negotiateResult.handler?.invoke(this, ProtocolId.from("AProtocol"), remoteConnection)
             assertTrue(hit)
 
             remoteReceived(
@@ -227,7 +227,7 @@ internal class MultistreamMuxerTest {
     fun handleFunc() = runTest {
         muxer.addHandler(ProtocolId.from("/a"))
         muxer.addHandler(ProtocolId.from("/b"))
-        muxer.addHandler(ProtocolId.from("/c")) { p, _ ->
+        muxer.addHandler(ProtocolId.from("/c")) { _, p, _ ->
             assertEquals(ProtocolId.from("/c"), p, "incorrect protocol selected")
             Ok(Unit)
         }
