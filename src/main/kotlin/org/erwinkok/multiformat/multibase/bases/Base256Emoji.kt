@@ -41,7 +41,7 @@ object Base256Emoji {
         "🐷", "☎", "💧", "😯", "💆", "👆", "🎤", "🙇", "🍑", "❄",
         "🌴", "💣", "🐸", "💌", "📍", "🥀", "🤢", "👅", "💡", "💩",
         "👐", "📸", "👻", "🤐", "🤮", "🎼", "🥵", "🚩", "🍎", "🍊",
-        "👼", "💍", "📣", "🥂"
+        "👼", "💍", "📣", "🥂",
     )
     private val forwardTable = HashMap<Int, String>(base256emojiTable.size)
     private val reverseTable = HashMap<Int, Byte>(base256emojiTable.size)

@@ -542,7 +542,8 @@ enum class Multicodec(val typeName: String, val code: Int, val tag: MulticodecTa
     ES284("es284", 0xd01201, MulticodecTag.Varsig),
     ES512("es512", 0xd01202, MulticodecTag.Varsig),
     RS256("rs256", 0xd01205, MulticodecTag.Varsig),
-    SCION("scion", 0xd02000, MulticodecTag.Multiaddr);
+    SCION("scion", 0xd02000, MulticodecTag.Multiaddr),
+    ;
 
     override fun toString(): String {
         return typeName

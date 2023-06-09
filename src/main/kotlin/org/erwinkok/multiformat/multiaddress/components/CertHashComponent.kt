@@ -2,6 +2,7 @@
 package org.erwinkok.multiformat.multiaddress.components
 
 import org.erwinkok.multiformat.multiaddress.Protocol
+import org.erwinkok.multiformat.multiaddress.Transcoder
 import org.erwinkok.multiformat.multibase.Multibase
 import org.erwinkok.multiformat.multihash.Multihash
 import org.erwinkok.result.Err
@@ -14,16 +15,16 @@ class CertHashComponent private constructor(addressBytes: ByteArray) : Component
     override val value: String
         get() = Multibase.BASE64_URL.encode(addressBytes)
 
-    companion object {
-        fun fromBytes(bytes: ByteArray): Result<CertHashComponent> {
+    companion object : Transcoder {
+        override fun bytesToComponent(protocol: Protocol, bytes: ByteArray): Result<CertHashComponent> {
             Multihash.fromBytes(bytes)
                 .onFailure { return Err(it) }
             return Ok(CertHashComponent(bytes))
         }
 
-        fun fromString(string: String): Result<CertHashComponent> {
+        override fun stringToComponent(protocol: Protocol, string: String): Result<CertHashComponent> {
             return Multibase.decode(string)
-                .flatMap { fromBytes(it) }
+                .flatMap { bytesToComponent(protocol, it) }
         }
     }
 }

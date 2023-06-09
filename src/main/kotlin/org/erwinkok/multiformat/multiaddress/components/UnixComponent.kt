@@ -2,19 +2,20 @@
 package org.erwinkok.multiformat.multiaddress.components
 
 import org.erwinkok.multiformat.multiaddress.Protocol
+import org.erwinkok.multiformat.multiaddress.Transcoder
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
 
-class UnixComponent private constructor(val path: String) : Component(Protocol.UNIX, path.toByteArray()) {
+class UnixComponent private constructor(private val path: String) : Component(Protocol.UNIX, path.toByteArray()) {
     override val value: String
         get() = path
 
-    companion object {
-        fun fromBytes(bytes: ByteArray): Result<UnixComponent> {
-            return fromString(String(bytes))
+    companion object : Transcoder {
+        override fun bytesToComponent(protocol: Protocol, bytes: ByteArray): Result<UnixComponent> {
+            return stringToComponent(protocol, String(bytes))
         }
 
-        fun fromString(string: String): Result<UnixComponent> {
+        override fun stringToComponent(protocol: Protocol, string: String): Result<UnixComponent> {
             return Ok(UnixComponent(string))
         }
     }

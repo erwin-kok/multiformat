@@ -42,7 +42,8 @@ enum class Multibase(val code: String, val encoding: String, private val encoder
     BASE64_URL("u", "base64url", { data -> Base64.encodeToStringUrl(data) }, { data -> Base64.decodeStringUrl(data) }),
     BASE64_PAD("M", "base64pad", { data -> Base64.encodeToStringPad(data) }, { data -> Base64.decodeStringPad(data) }),
     BASE64_URL_PAD("U", "base64urlpad", { data -> Base64.encodeToStringUrlPad(data) }, { data -> Base64.decodeStringUrlPad(data) }),
-    BASE256_EMOJI("🚀", "base256emoji", { data -> Base256Emoji.encodeToString(data) }, { data -> Base256Emoji.decodeString(data) });
+    BASE256_EMOJI("🚀", "base256emoji", { data -> Base256Emoji.encodeToString(data) }, { data -> Base256Emoji.decodeString(data) }),
+    ;
 
     fun encode(data: ByteArray): String {
         return code + encoder(data)

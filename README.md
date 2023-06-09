@@ -2,7 +2,23 @@
 Self-describing values for Future-proofing
 
 [![ci](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml/badge.svg)](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml)
+[![Maven Central](https://img.shields.io/maven-central/v/org.erwinkok.multiformat/multiformat)](https://central.sonatype.com/artifact/org.erwinkok.result/result-monad)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.8.22-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![License](https://img.shields.io/github/license/erwin-kok/multiformat.svg)](https://github.com/erwin-kok/multiformat/blob/master/LICENSE)
+
+## Usage
+
+Kotlin DSL:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.erwinkok.multiformat:multiformat:1.0.0")
+}
+```
 
 ## Introduction
 

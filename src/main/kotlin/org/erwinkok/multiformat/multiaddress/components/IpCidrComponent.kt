@@ -2,6 +2,7 @@
 package org.erwinkok.multiformat.multiaddress.components
 
 import org.erwinkok.multiformat.multiaddress.Protocol
+import org.erwinkok.multiformat.multiaddress.Transcoder
 import org.erwinkok.result.Err
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
@@ -11,15 +12,15 @@ class IpCidrComponent private constructor(addressByte: Byte) : Component(Protoco
     override val value: String
         get() = "${addressBytes[0].toUByte()}"
 
-    companion object {
-        fun fromBytes(bytes: ByteArray): Result<IpCidrComponent> {
+    companion object : Transcoder {
+        override fun bytesToComponent(protocol: Protocol, bytes: ByteArray): Result<IpCidrComponent> {
             if (bytes.size != 1) {
                 return Err("invalid length (should be == 1)")
             }
             return Ok(IpCidrComponent(bytes[0]))
         }
 
-        fun fromString(string: String): Result<IpCidrComponent> {
+        override fun stringToComponent(protocol: Protocol, string: String): Result<IpCidrComponent> {
             return try {
                 val i = Integer.parseUnsignedInt(string, 10)
                 if (i > 255) {

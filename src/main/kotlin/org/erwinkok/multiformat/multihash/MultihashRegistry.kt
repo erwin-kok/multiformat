@@ -73,7 +73,7 @@ object MultihashRegistry {
                     val message = "Could not register hasher for $type: ${errorMessage(it)}"
                     logger.warn(message)
                     Err(message)
-                }
+                },
             )
     }
 
@@ -89,7 +89,7 @@ object MultihashRegistry {
                     val message = "Could not register hasher for $type: ${errorMessage(it)}"
                     logger.warn(message)
                     Err(message)
-                }
+                },
             )
     }
 

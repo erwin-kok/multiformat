@@ -8,5 +8,5 @@ typealias ProtocolHandler<T> = suspend (protocol: ProtocolId, stream: T) -> Resu
 data class ProtocolHandlerInfo<T : Utf8Connection>(
     val match: (ProtocolId) -> Boolean,
     val protocol: ProtocolId,
-    val handler: ProtocolHandler<T>? = null
+    val handler: ProtocolHandler<T>? = null,
 )

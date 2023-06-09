@@ -111,7 +111,7 @@ class Blake3(private val key: ChainValue, private val size: Int, private val fla
         val cv4: UInt,
         val cv5: UInt,
         val cv6: UInt,
-        val cv7: UInt
+        val cv7: UInt,
     ) {
         constructor(a: UIntArray) : this(
             a[0],
@@ -121,7 +121,7 @@ class Blake3(private val key: ChainValue, private val size: Int, private val fla
             a[4],
             a[5],
             a[6],
-            a[7]
+            a[7],
         )
 
         operator fun get(index: Int): UInt {
@@ -226,11 +226,11 @@ class Blake3(private val key: ChainValue, private val size: Int, private val fla
             0x510E527Fu,
             0x9B05688Cu,
             0x1F83D9ABu,
-            0x5BE0CD19u
+            0x5BE0CD19u,
         )
 
         private val MessagePermutation = intArrayOf(
-            2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8
+            2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8,
         )
 
         fun fromKey(key: ByteArray?, size: Int): Hasher {
@@ -311,7 +311,7 @@ class Blake3(private val key: ChainValue, private val size: Int, private val fla
                 counterInt,
                 counterShift,
                 blockLen.toUInt(),
-                flags.toUInt()
+                flags.toUInt(),
             )
             var bw = blockWords
             round(state, bw) // Round 1

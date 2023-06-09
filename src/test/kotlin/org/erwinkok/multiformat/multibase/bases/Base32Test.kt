@@ -31,7 +31,7 @@ internal class Base32Test {
         Tuple2("leasure.", "NRSWC43VOJSS4==="),
         Tuple2("easure.", "MVQXG5LSMUXA===="),
         Tuple2("asure.", "MFZXK4TFFY======"),
-        Tuple2("sure.", "ON2XEZJO")
+        Tuple2("sure.", "ON2XEZJO"),
     )
 
     @TestFactory
@@ -79,7 +79,7 @@ internal class Base32Test {
             Tuple2("AAAAA===", -1),
             Tuple2("AAAAAA==", 6),
             Tuple2("AAAAAAA=", -1),
-            Tuple2("AAAAAAAA", -1)
+            Tuple2("AAAAAAAA", -1),
         ).map { (inp, offset) ->
             DynamicTest.dynamicTest("Test $inp") {
                 val result = Base32.decodeStdPad(inp)
@@ -105,7 +105,7 @@ internal class Base32Test {
             Tuple2("ON2XEZ\nI=", "sure"),
             Tuple2("ON2XEZI\n=", "sure"),
             Tuple2("MZXW6YTBOI======", "foobar"),
-            Tuple2("MZXW6YTBOI=\r\n=====", "foobar")
+            Tuple2("MZXW6YTBOI=\r\n=====", "foobar"),
         ).map { (inp, expected) ->
             DynamicTest.dynamicTest("Test $inp") {
                 val result = Base32.decodeStdPad(inp).expectNoErrors()
@@ -123,7 +123,7 @@ internal class Base32Test {
             "abcd",
             "abcde",
             "",
-            String(byteArrayOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))
+            String(byteArrayOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
         ).map { inp ->
             DynamicTest.dynamicTest("Test $inp") {
                 val enc = Base32.encodeStdUpperNoPad(inp.toByteArray())

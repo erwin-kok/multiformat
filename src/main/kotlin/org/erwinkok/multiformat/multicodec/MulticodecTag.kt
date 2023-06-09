@@ -21,5 +21,5 @@ enum class MulticodecTag {
     Softhash,
     Transport,
     Varsig,
-    Zeroxcert
+    Zeroxcert,
 }

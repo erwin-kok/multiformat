@@ -272,7 +272,7 @@ internal class Blake2sTest {
             "11030b9289bba5af65260672ab6fee88b87420acef4a1789a2073b7ec2f2a09e",
             "69cb192b8444005c8c0ceb12c846860768188cda0aec27a9c8a55cdee2123632",
             "db444c15597b5f1a03d1f9edd16e4a9f43a667cc275175dfa2b704e3bb1a9b83",
-            "3fb735061abc519dfe979e54c1ee5bfad0a9d858b3315bad34bde999efd724dd"
+            "3fb735061abc519dfe979e54c1ee5bfad0a9d858b3315bad34bde999efd724dd",
         ).withIndex()
             .map { (i, expectedHex) ->
                 DynamicTest.dynamicTest("Test: $i - $expectedHex") {

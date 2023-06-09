@@ -25,7 +25,7 @@ class TestUtf8Connection {
 
     inner class Inner(
         val input: ByteChannel,
-        val output: ByteChannel
+        val output: ByteChannel,
     ) : Utf8Connection {
         override suspend fun readUtf8(): Result<String> {
             return readUnsignedVarInt()

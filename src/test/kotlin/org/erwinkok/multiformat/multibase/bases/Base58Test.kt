@@ -18,7 +18,7 @@ internal class Base58Test {
             "1QCaxc8hutpdZ62iKZsn1TCG3nh7uPZojq",
             "1DhRmSGnhPjUaVPAj48zgPV9e2oRhAQFUb",
             "17LN2oPYRYsXS9TdYdXCCDvF2FegshLDU2",
-            "14h2bDLZSuvRFhUL45VjPHJcW667mmRAAn"
+            "14h2bDLZSuvRFhUL45VjPHJcW667mmRAAn",
         ).map { str ->
             DynamicTest.dynamicTest("Test: $str") {
                 val num = Base58.decodeStringBtc(str).expectNoErrors()

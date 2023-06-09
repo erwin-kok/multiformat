@@ -307,7 +307,7 @@ class Blake2b private constructor(key: ByteArray?, hashSize: Int = Size) : Hashe
             0x510e527fade682d1u,
             0x9b05688c2b3e6c1fu,
             0x1f83d9abfb41bd6bu,
-            0x5be0cd19137e2179u
+            0x5be0cd19137e2179u,
         )
 
         private var precomputed = arrayOf(
@@ -322,7 +322,7 @@ class Blake2b private constructor(key: ByteArray?, hashSize: Int = Size) : Hashe
             byteArrayOf(6, 14, 11, 0, 15, 9, 3, 8, 12, 13, 1, 10, 2, 7, 4, 5),
             byteArrayOf(10, 8, 7, 1, 2, 4, 6, 5, 15, 9, 3, 13, 11, 14, 12, 0),
             byteArrayOf(0, 2, 4, 6, 1, 3, 5, 7, 8, 10, 12, 14, 9, 11, 13, 15), // equal to the first
-            byteArrayOf(14, 4, 9, 13, 10, 8, 15, 6, 1, 0, 11, 5, 12, 2, 7, 3) // equal to the second
+            byteArrayOf(14, 4, 9, 13, 10, 8, 15, 6, 1, 0, 11, 5, 12, 2, 7, 3), // equal to the second
         )
     }
 }

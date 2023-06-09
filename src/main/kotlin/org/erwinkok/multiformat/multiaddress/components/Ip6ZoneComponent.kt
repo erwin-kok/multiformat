@@ -2,6 +2,7 @@
 package org.erwinkok.multiformat.multiaddress.components
 
 import org.erwinkok.multiformat.multiaddress.Protocol
+import org.erwinkok.multiformat.multiaddress.Transcoder
 import org.erwinkok.result.Err
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
@@ -11,8 +12,8 @@ class Ip6ZoneComponent private constructor(val address: String) : Component(Prot
     override val value: String
         get() = address
 
-    companion object {
-        fun fromBytes(bytes: ByteArray): Result<Ip6ZoneComponent> {
+    companion object : Transcoder {
+        override fun bytesToComponent(protocol: Protocol, bytes: ByteArray): Result<Ip6ZoneComponent> {
             if (bytes.isEmpty()) {
                 return Err("invalid length (should be > 0)")
             }
@@ -22,14 +23,14 @@ class Ip6ZoneComponent private constructor(val address: String) : Component(Prot
             return Ok(Ip6ZoneComponent(String(bytes)))
         }
 
-        fun fromString(address: String): Result<Ip6ZoneComponent> {
-            if (address.isEmpty()) {
+        override fun stringToComponent(protocol: Protocol, string: String): Result<Ip6ZoneComponent> {
+            if (string.isEmpty()) {
                 return Err("Empty IPv6Zone")
             }
-            if (address.contains("/")) {
-                return Err("IPv6Zone ID contains '/': $address")
+            if (string.contains("/")) {
+                return Err("IPv6Zone ID contains '/': $string")
             }
-            return Ok(Ip6ZoneComponent(address))
+            return Ok(Ip6ZoneComponent(string))
         }
     }
 }

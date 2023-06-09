@@ -5,7 +5,8 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.8.22"
+
     `java-library`
     `java-test-fixtures`
     signing
@@ -17,6 +18,7 @@ plugins {
     alias(libs.plugins.build.versions)
     alias(libs.plugins.build.testlogger)
     alias(libs.plugins.build.protobuf)
+    alias(libs.plugins.build.serialization)
 }
 
 repositories {
@@ -28,7 +30,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.4.2-SNAPSHOT"
+version = "0.5.0-SNAPSHOT"
 
 java {
     withSourcesJar()
@@ -36,17 +38,18 @@ java {
 }
 
 dependencies {
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(platform(kotlin("bom")))
+    implementation(kotlin("stdlib"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.atomicfu)
     implementation(libs.kotlin.logging)
+    implementation(libs.kotlin.serialization)
 
     implementation(libs.ipaddress)
     implementation(libs.ktor.network)
-
     implementation(libs.result.monad)
+    implementation(libs.slf4j.api)
 
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.params)
@@ -105,25 +108,27 @@ koverReport {
         excludes {
             classes(
                 "org.erwinkok.multiformat.multicodec.Codec",
-                "org.erwinkok.multiformat.multicodec.GenerateKt*"
+                "org.erwinkok.multiformat.multicodec.GenerateKt*",
             )
         }
     }
 
-    html {
-        onCheck = true
-    }
+    defaults {
+        html {
+            onCheck = true
+        }
 
-    verify {
-        onCheck = true
-        rule {
-            isEnabled = true
-            entity = kotlinx.kover.gradle.plugin.dsl.GroupingEntityType.APPLICATION
-            bound {
-                minValue = 0
-                maxValue = 99
-                metric = kotlinx.kover.gradle.plugin.dsl.MetricType.LINE
-                aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
+        verify {
+            onCheck = true
+            rule {
+                isEnabled = true
+                entity = kotlinx.kover.gradle.plugin.dsl.GroupingEntityType.APPLICATION
+                bound {
+                    minValue = 0
+                    maxValue = 99
+                    metric = kotlinx.kover.gradle.plugin.dsl.MetricType.LINE
+                    aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
+                }
             }
         }
     }
@@ -145,8 +150,11 @@ publishing {
                 }
                 developers {
                     developer {
+                        id.set("erwin-kok")
                         name.set("Erwin Kok")
+                        email.set("github@erwinkok.org")
                         url.set("https://github.com/erwin-kok/")
+                        roles.set(listOf("owner", "developer"))
                     }
                 }
                 scm {

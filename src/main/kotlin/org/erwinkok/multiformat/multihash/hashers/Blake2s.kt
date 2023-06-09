@@ -286,7 +286,7 @@ class Blake2s private constructor(key: ByteArray?) : Hasher {
             0x510e527fu,
             0x9b05688cu,
             0x1f83d9abu,
-            0x5be0cd19u
+            0x5be0cd19u,
         )
 
         private var precomputed = arrayOf(
@@ -299,7 +299,7 @@ class Blake2s private constructor(key: ByteArray?) : Hasher {
             byteArrayOf(12, 1, 14, 4, 5, 15, 13, 10, 0, 6, 9, 8, 7, 3, 2, 11),
             byteArrayOf(13, 7, 12, 3, 11, 14, 1, 9, 5, 15, 8, 2, 0, 4, 6, 10),
             byteArrayOf(6, 14, 11, 0, 15, 9, 3, 8, 12, 13, 1, 10, 2, 7, 4, 5),
-            byteArrayOf(10, 8, 7, 1, 2, 4, 6, 5, 15, 9, 3, 13, 11, 14, 12, 0)
+            byteArrayOf(10, 8, 7, 1, 2, 4, 6, 5, 15, 9, 3, 13, 11, 14, 12, 0),
         )
     }
 }

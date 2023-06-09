@@ -1,8 +1,10 @@
 // Copyright (c) 2023 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multistream
 
+import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
+@Serializable
 class ProtocolId private constructor(val id: String) {
     override fun hashCode(): Int {
         return id.hashCode()

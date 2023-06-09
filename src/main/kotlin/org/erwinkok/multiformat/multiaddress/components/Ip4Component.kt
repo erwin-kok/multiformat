@@ -5,6 +5,7 @@ import inet.ipaddr.AddressValueException
 import inet.ipaddr.IPAddressString
 import inet.ipaddr.ipv4.IPv4Address
 import org.erwinkok.multiformat.multiaddress.Protocol
+import org.erwinkok.multiformat.multiaddress.Transcoder
 import org.erwinkok.result.Err
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
@@ -13,8 +14,8 @@ class Ip4Component private constructor(private val ipAddress: IPv4Address) : Com
     override val value: String
         get() = ipAddress.toString()
 
-    companion object {
-        fun fromBytes(bytes: ByteArray): Result<Ip4Component> {
+    companion object : Transcoder {
+        override fun bytesToComponent(protocol: Protocol, bytes: ByteArray): Result<Ip4Component> {
             return try {
                 Ok(Ip4Component(IPv4Address(bytes)))
             } catch (e: AddressValueException) {
@@ -22,7 +23,7 @@ class Ip4Component private constructor(private val ipAddress: IPv4Address) : Com
             }
         }
 
-        fun fromString(string: String): Result<Ip4Component> {
+        override fun stringToComponent(protocol: Protocol, string: String): Result<Ip4Component> {
             val ipAddress = IPAddressString(string).address?.toIPv4() ?: return Err("Invalid IPv4 address: $string")
             return Ok(Ip4Component(ipAddress))
         }

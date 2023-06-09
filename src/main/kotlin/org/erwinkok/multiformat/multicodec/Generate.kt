@@ -10,7 +10,7 @@ private data class Codec(
     val tag: String,
     val code: Int,
     val status: String,
-    val description: String
+    val description: String,
 )
 
 fun main() {
@@ -35,7 +35,7 @@ import org.erwinkok.result.Err
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
 import java.util.TreeMap
-        """.trimIndent()
+        """.trimIndent(),
     )
     writer.appendLine()
     writer.appendLine("enum class Multicodec(val typeName: String, val code: Int, val tag: MulticodecTag) {")
@@ -44,7 +44,7 @@ import java.util.TreeMap
             val name = it.name.uppercase().replace('-', '_')
             val tag = it.tag.replaceFirstChar { ch -> ch.uppercaseChar() }
             "    $name(\"${it.name}\", ${String.format("%#04x", it.code)}, MulticodecTag.$tag)"
-        }
+        },
     )
     writer.appendLine(";")
     writer.appendLine()
@@ -80,7 +80,7 @@ import java.util.TreeMap
             val type = codeToType[code] ?: return Err("Unknown Multicodec code: ${'$'}code")
             return Ok(type)
         }
-    }"""
+    }""",
     )
     writer.appendLine("}")
     writer.flush()
@@ -98,7 +98,7 @@ private fun writeTagFile(distinct: List<String>) {
 package org.erwinkok.multiformat.multicodec
 
 enum class MulticodecTag {
-        """.trimIndent()
+        """.trimIndent(),
     )
     writer.appendLine(distinct.joinToString(separator = ",\n") { "    $it" })
     writer.appendLine("}")

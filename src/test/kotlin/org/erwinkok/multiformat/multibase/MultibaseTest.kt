@@ -28,7 +28,7 @@ internal class MultibaseTest {
         val name: String,
         val code: String,
         val description: String,
-        val status: String
+        val status: String,
     )
 
     @Test
@@ -188,7 +188,7 @@ internal class MultibaseTest {
             Tuple3(
                 "base2",
                 "Decentralize everything!!",
-                "001000100011001010110001101100101011011100111010001110010011000010110110001101001011110100110010100100000011001010111011001100101011100100111100101110100011010000110100101101110011001110010000100100001"
+                "001000100011001010110001101100101011011100111010001110010011000010110110001101001011110100110010100100000011001010111011001100101011100100111100101110100011010000110100101101110011001110010000100100001",
             ),
             Tuple3("base8", "Decentralize everything!!", "72106254331267164344605543227514510062566312711713506415133463441102"),
             Tuple3("base10", "Decentralize everything!!", "9429328951066508984658627669258025763026247056774804621697313"),
@@ -233,7 +233,7 @@ internal class MultibaseTest {
             Tuple3("base64", "hello world", "maGVsbG8gd29ybGQ"),
             Tuple3("base64pad", "hello world", "MaGVsbG8gd29ybGQ="),
             Tuple3("base64url", "hello world", "uaGVsbG8gd29ybGQ"),
-            Tuple3("base64urlpad", "hello world", "UaGVsbG8gd29ybGQ=")
+            Tuple3("base64urlpad", "hello world", "UaGVsbG8gd29ybGQ="),
         )
     }
 

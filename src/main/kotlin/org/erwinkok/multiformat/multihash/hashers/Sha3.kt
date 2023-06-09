@@ -26,11 +26,11 @@ open class Sha3(
     // [1] http://csrc.nist.gov/publications/drafts/fips-202/fips_202_draft.pdf
     //     "Draft FIPS 202: SHA-3 Standard: Permutation-Based Hash and
     //      Extendable-Output Functions (May 2014)"
-    val dsbyte: Byte
+    val dsbyte: Byte,
 ) : Hasher {
     enum class SpongeDirection {
         SpongeAbsorbing,
-        SpongeSqueezing
+        SpongeSqueezing,
     }
 
     private val a = LongArray(25) // main state of the hash
@@ -633,7 +633,7 @@ open class Sha3(
             0x8000000080008081uL,
             0x8000000000008080uL,
             0x0000000080000001uL,
-            0x8000000080008008uL
+            0x8000000080008008uL,
         )
     }
 }

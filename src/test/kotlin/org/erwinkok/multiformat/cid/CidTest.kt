@@ -21,7 +21,7 @@ internal class CidTest {
         return listOf(
             Multicodec.IDENTITY,
             Multicodec.SHA3_512,
-            Multicodec.SHA2_256
+            Multicodec.SHA2_256,
         ).map { hash ->
             DynamicTest.dynamicTest("Test: $hash") {
                 val h1 = Multihash.sum(hash, "TEST".toByteArray(), -1).expectNoErrors()
@@ -68,7 +68,7 @@ internal class CidTest {
             Multibase.BASE64_PAD,
             Multibase.BASE64_URL_PAD,
             Multibase.BASE64_URL,
-            Multibase.BASE64
+            Multibase.BASE64,
         ).map { base ->
             DynamicTest.dynamicTest("Test: $base") {
                 val s = cid.toString(base).expectNoErrors()
