@@ -30,7 +30,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.5.0-SNAPSHOT"
+version = "0.5.1-SNAPSHOT"
 
 java {
     withSourcesJar()
