@@ -13,7 +13,7 @@ import org.erwinkok.result.errorMessage
 import org.erwinkok.result.getOrElse
 import org.erwinkok.result.map
 
-class MultihashComponent private constructor(private val multihash: Multihash) : Component(Protocol.P2P, multihash.bytes()) {
+class MultihashComponent private constructor(val multihash: Multihash) : Component(Protocol.P2P, multihash.bytes()) {
     override val value: String
         get() = multihash.base58()
 
