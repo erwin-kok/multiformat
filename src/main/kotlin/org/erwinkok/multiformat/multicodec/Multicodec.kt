@@ -75,7 +75,7 @@ enum class Multicodec(val typeName: String, val code: Int, val tag: MulticodecTa
     ETH_ACCOUNT_SNAPSHOT("eth-account-snapshot", 0x97, MulticodecTag.Ipld),
     ETH_STORAGE_TRIE("eth-storage-trie", 0x98, MulticodecTag.Ipld),
     ETH_RECEIPT_LOG_TRIE("eth-receipt-log-trie", 0x99, MulticodecTag.Ipld),
-    ETH_RECIEPT_LOG("eth-reciept-log", 0x9a, MulticodecTag.Ipld),
+    ETH_RECEIPT_LOG("eth-receipt-log", 0x9a, MulticodecTag.Ipld),
     AES_128("aes-128", 0xa0, MulticodecTag.Key),
     AES_192("aes-192", 0xa1, MulticodecTag.Key),
     AES_256("aes-256", 0xa2, MulticodecTag.Key),
@@ -541,7 +541,8 @@ enum class Multicodec(val typeName: String, val code: Int, val tag: MulticodecTa
     ES256("es256", 0xd01200, MulticodecTag.Varsig),
     ES284("es284", 0xd01201, MulticodecTag.Varsig),
     ES512("es512", 0xd01202, MulticodecTag.Varsig),
-    RS256("rs256", 0xd01205, MulticodecTag.Varsig);
+    RS256("rs256", 0xd01205, MulticodecTag.Varsig),
+    SCION("scion", 0xd02000, MulticodecTag.Multiaddr);
 
     override fun toString(): String {
         return typeName
