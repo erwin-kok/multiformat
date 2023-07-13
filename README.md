@@ -3,7 +3,7 @@ Self-describing values for Future-proofing
 
 [![ci](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml/badge.svg)](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.erwinkok.multiformat/multiformat)](https://central.sonatype.com/artifact/org.erwinkok.result/result-monad)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.8.22-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.9.0-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![License](https://img.shields.io/github/license/erwin-kok/multiformat.svg)](https://github.com/erwin-kok/multiformat/blob/master/LICENSE)
 
 ## Usage
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.erwinkok.multiformat:multiformat:1.0.0")
+    implementation("org.erwinkok.multiformat:multiformat:$latest")
 }
 ```
 
@@ -26,10 +26,11 @@ This project implements various protocols defined at: https://multiformats.io/
 
 Notably, the following protocols are implemented:
 
-- multihash (https://multiformats.io/multihash/)
-- multiaddr (https://multiformats.io/multiaddr/)
-- multibase (https://github.com/multiformats/multibase)
-- multicodec (https://github.com/multiformats/multicodec)
+- [multiaddr](https://github.com/multiformats/multiaddr): network addresses
+- [multibase](https://github.com/multiformats/multibase): base encodings
+- [multicodec](https://github.com/multiformats/multicodec): serialization codes
+- [multihash](https://github.com/multiformats/multihash): cryptographic hashes
+- [multistream-select](https://github.com/multiformats/multistream-select): Friendly protocol multiplexing.
 
 Next to this, it also implements Cid: https://github.com/multiformats/cid
 
@@ -75,7 +76,7 @@ Bug reports and pull requests are welcome on [GitHub](https://github.com/erwin-k
 
 ## Contact
 
-If you want to contact me, please write an e-mail to: [github@erwinkok.org](mailto:github@erwinkok.org)
+If you want to contact me, please write an e-mail to: [erwin-kok@gmx.com](mailto:erwin-kok@gmx.com)
 
 ## License
 

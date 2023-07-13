@@ -186,6 +186,7 @@ enum class Multicodec(val typeName: String, val code: Int, val tag: MulticodecTa
     AES_GCM_256("aes-gcm-256", 0x2000, MulticodecTag.Encryption),
     SILVERPINE("silverpine", 0x3f42, MulticodecTag.Multiaddr),
     SM3_256("sm3-256", 0x534d, MulticodecTag.Multihash),
+    SHA256A("sha256a", 0x7012, MulticodecTag.Hash),
     BLAKE2B_8("blake2b-8", 0xb201, MulticodecTag.Multihash),
     BLAKE2B_16("blake2b-16", 0xb202, MulticodecTag.Multihash),
     BLAKE2B_24("blake2b-24", 0xb203, MulticodecTag.Multihash),

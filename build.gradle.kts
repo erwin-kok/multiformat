@@ -5,7 +5,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.8.22"
+    kotlin("jvm") version "1.9.0"
 
     `java-library`
     `java-test-fixtures`
@@ -30,7 +30,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "0.5.1-SNAPSHOT"
+version = "1.0.0"
 
 java {
     withSourcesJar()
