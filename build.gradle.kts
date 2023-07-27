@@ -140,6 +140,7 @@ publishing {
             from(components["java"])
             pom {
                 name.set(project.name)
+                description.set("Multiformats protocols")
                 inceptionYear.set("2022")
                 url.set("https://github.com/erwin-kok/multiformat")
                 licenses {
@@ -152,7 +153,7 @@ publishing {
                     developer {
                         id.set("erwin-kok")
                         name.set("Erwin Kok")
-                        email.set("github@erwinkok.org")
+                        email.set("erwin-kok@gmx.com")
                         url.set("https://github.com/erwin-kok/")
                         roles.set(listOf("owner", "developer"))
                     }
