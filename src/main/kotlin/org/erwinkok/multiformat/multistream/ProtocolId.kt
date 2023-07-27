@@ -30,7 +30,7 @@ class ProtocolId private constructor(val id: String) {
 
         val Null = ProtocolId(UnknownProtocolId)
 
-        fun from(key: String?): ProtocolId {
+        fun of(key: String?): ProtocolId {
             if (key.isNullOrBlank() || key == UnknownProtocolId) {
                 return Null
             }

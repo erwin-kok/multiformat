@@ -12,19 +12,19 @@ import org.junit.jupiter.api.Test
 internal class ProtocolIdTest {
     @Test
     fun sameProtocol() {
-        assertSame(ProtocolId.from("/abc"), ProtocolId.from("/abc"))
+        assertSame(ProtocolId.of("/abc"), ProtocolId.of("/abc"))
     }
 
     @Test
     fun notTheSameProtocol() {
-        assertNotSame(ProtocolId.from("/abc"), ProtocolId.from("/def"))
+        assertNotSame(ProtocolId.of("/abc"), ProtocolId.of("/def"))
     }
 
     @Test
     fun nullProtocol() {
-        assertSame(ProtocolId.Null, ProtocolId.from("<Unknown>"))
-        assertSame(ProtocolId.Null, ProtocolId.from(""))
-        assertSame(ProtocolId.Null, ProtocolId.from(null))
+        assertSame(ProtocolId.Null, ProtocolId.of("<Unknown>"))
+        assertSame(ProtocolId.Null, ProtocolId.of(""))
+        assertSame(ProtocolId.Null, ProtocolId.of(null))
         assertEquals("<Unknown>", ProtocolId.Null.id)
     }
 }

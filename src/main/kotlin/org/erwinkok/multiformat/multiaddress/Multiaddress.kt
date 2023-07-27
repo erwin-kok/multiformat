@@ -1,7 +1,6 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multiaddress
 
-import mu.KotlinLogging
 import org.erwinkok.multiformat.multiaddress.components.Component
 import org.erwinkok.multiformat.multibase.Multibase
 import org.erwinkok.multiformat.multihash.Multihash
@@ -13,8 +12,6 @@ import org.erwinkok.result.flatMap
 import org.erwinkok.result.getOrElse
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-
-private val logger = KotlinLogging.logger {}
 
 class Multiaddress private constructor(val components: List<Component>) {
     private val _string: String by lazy { constructString() }

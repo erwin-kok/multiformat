@@ -19,19 +19,12 @@ internal class MultihashTest {
     private val MaxVarintLen64 = 10
 
     @Test
-    fun toB58String() {
+    fun base58String() {
         val src = "QmPfjpVaf593UQJ9a5ECvdh2x17XuJYG5Yanv5UFnH3jPE"
         val expected = Hex.decode("122013bf801597d74a660453412635edd8c34271e5998f801fac5d700c6ce8d8e461").expectNoErrors()
         val multihash = Multihash.fromBase58(src).expectNoErrors()
         assertArrayEquals(multihash.bytes(), expected)
         assertEquals(src, multihash.base58())
-    }
-
-    @Test
-    fun fromB58String() {
-        val src = "QmPfjpVaf593UQJ9a5ECvdh2x17XuJYG5Yanv5UFnH3jPE"
-        val expected = Hex.decode("122013bf801597d74a660453412635edd8c34271e5998f801fac5d700c6ce8d8e461").expectNoErrors()
-        assertArrayEquals(Multihash.fromBase58(src).expectNoErrors().bytes(), expected)
     }
 
     @Test

@@ -40,7 +40,50 @@ Next to this, it also implements Cid: https://github.com/multiformats/cid
 This project is using the [result-monad](https://github.com/erwin-kok/result-monad)
 
 This means that (almost) all methods of this project return a `Result<...>`. The caller can check whether an error was generated, 
-or it can use the value. For example:
+or it can use the value. 
+
+## Usage
+
+A (very) brief description on how to use multiformats:
+
+...but please also look at the various tests.
+
+### multiaddr
+
+```kotlin
+val addr1 = Multiaddress.fromString("/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234")
+    .getOrElse {
+        log.error { "Could not parse Multiaddress: ${errorMessage(it)}" }
+        return Err(it)
+    }
+val ip6Addr = Multiaddress.fromString("/ip6/2001:8a0:7ac5:4201:3ac9:86ff:fe31:7095").getOrThrow()
+val tcpAddr = Multiaddress.fromString("/tcp/8000").getOrThrow()
+val webAddr = Multiaddress.fromString("/ws").getOrThrow()
+val actual1 = Multiaddress.fromString("/").expectNoErrors()
+    .encapsulate(ip6Addr).expectNoErrors()
+    .encapsulate(tcpAddr).expectNoErrors()
+    .encapsulate(webAddr).expectNoErrors()
+    .toString()
+```
+
+### multibase
+
+```kotlin
+val multibase = Multibase.encode("base16", "foobar".toByteArray()).getOrThrow()
+val bytes = Multibase.decode("f666f6f626172").getOrThrow()
+```
+
+### multicodec
+```kotlin
+val codec = Multicodec.nameToType("cidv2")
+```
+
+### multihash
+```kotlin
+val multihash = Multihash.fromBase58("QmPfjpVaf593UQJ9a5ECvdh2x17XuJYG5Yanv5UFnH3jPE")
+```
+
+### multistream-select
 
 ```kotlin
 val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection)
@@ -50,25 +93,19 @@ val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection)
     }
 ```
 
-In the examples below `OnFailure` is used as a convenience, but other methods can be used as well.
-
-If you would like to throw the Error instead, do:
-
-```kotlin
-val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection).getOrThrow()
-```
-
-This will return the key pair when no error occurred, and throws an `Error` exception when an error occurred. 
 
 ## Sub-modules
 
-This project has three sub-modules:
+This project has three submodules:
 
+```shell
 git submodule add https://github.com/multiformats/multicodec src/main/kotlin/org/erwinkok/multiformat/spec/multicodec
-
 git submodule add https://github.com/multiformats/multibase src/main/kotlin/org/erwinkok/multiformat/spec/multibase
-
 git submodule add https://github.com/multiformats/multihash src/main/kotlin/org/erwinkok/multiformat/spec/multihash
+```
+
+These are the official specifications repositories, which are used here for auto-generation code and or verifying the 
+test results are according to spec.
 
 ## Contributing
 

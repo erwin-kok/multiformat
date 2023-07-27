@@ -5,9 +5,10 @@ import io.ktor.util.collections.ConcurrentSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import org.erwinkok.result.Err
 import org.erwinkok.result.Error
-import org.erwinkok.result.Errors
+import org.erwinkok.result.Errors.EndOfStream
 import org.erwinkok.result.Ok
 import org.erwinkok.result.Result
 import org.erwinkok.result.getOrElse
@@ -15,6 +16,8 @@ import org.erwinkok.result.map
 import org.erwinkok.result.onFailure
 import org.erwinkok.result.onSuccess
 import java.util.Random
+
+private val logger = KotlinLogging.logger {}
 
 class MultistreamMuxer<T : Utf8Connection> {
     private val handlers = ConcurrentSet<ProtocolHandlerInfo<T>>()
@@ -27,7 +30,7 @@ class MultistreamMuxer<T : Utf8Connection> {
         val result = mutableListOf<String>()
         val token = readNextToken(connection)
             .getOrElse {
-                if (it == Errors.EndOfStream) {
+                if (it == EndOfStream) {
                     return Ok(result)
                 }
                 return Err(it)
@@ -48,6 +51,9 @@ class MultistreamMuxer<T : Utf8Connection> {
         while (true) {
             val nextToken = readNextToken(connection)
                 .getOrElse {
+                    if (it == EndOfStream) {
+                        return Err(ErrEndNegotiating)
+                    }
                     return Err(it)
                 }
             if (nextToken == LS) {
@@ -57,6 +63,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             } else {
                 val handler = findHandler(nextToken)
                 if (handler == null) {
+                    logger.debug { "MultistreamMuxer: We do not support requested protocol $nextToken" }
                     connection.writeUtf8(NA)
                         .onFailure { return Err(it) }
                 } else {
@@ -103,7 +110,7 @@ class MultistreamMuxer<T : Utf8Connection> {
     }
 
     private fun findHandler(token: String): ProtocolHandlerInfo<T>? {
-        val protocol = ProtocolId.from(token)
+        val protocol = ProtocolId.of(token)
         for (handler in handlers) {
             if (handler.match(protocol)) {
                 return handler
@@ -127,9 +134,10 @@ class MultistreamMuxer<T : Utf8Connection> {
         private const val initiator = "initiator"
         private const val responder = "responder"
 
+        private val ErrIncorrectVersion = Error("client connected with incorrect version")
         private val ErrNoProtocols = Error("no protocols specified")
         private val ErrNotSupported = Error("Peer does not support any of the given protocols")
-        private val ErrIncorrectVersion = Error("client connected with incorrect version")
+        private val ErrEndNegotiating = Error("end negotiating: we do not support any of the requested protocols")
 
         suspend fun selectOneOf(protocols: Set<ProtocolId>, connection: Utf8Connection): Result<ProtocolId> {
             if (protocols.isEmpty()) {
@@ -245,7 +253,7 @@ class MultistreamMuxer<T : Utf8Connection> {
             while (true) {
                 val nextToken = readNextToken(connection)
                     .getOrElse {
-                        if (it == Errors.EndOfStream) {
+                        if (it == EndOfStream) {
                             return Err(ErrNotSupported)
                         }
                         return Err(it)
