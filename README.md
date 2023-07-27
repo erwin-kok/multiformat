@@ -40,7 +40,60 @@ Next to this, it also implements Cid: https://github.com/multiformats/cid
 This project is using the [result-monad](https://github.com/erwin-kok/result-monad)
 
 This means that (almost) all methods of this project return a `Result<...>`. The caller can check whether an error was generated, 
-or it can use the value. 
+or it can use the value. For example:
+
+```kotlin
+val connection = createConnection()
+    .getOrElse {
+        log.error { "Could not create connection: ${errorMessage(it)}" }
+        return Err(it)
+    }
+
+connection.write(...)
+
+
+fun createConnection(): Result<Connection> {
+  ...
+}
+```
+
+The advantage is that it is easier (at least for me) to track the flow of the code and to handle correct/error cases. 
+The disadvantage of exceptions is, is that you do not know which statement in a try-block generated the exception. For 
+example:
+
+```kotlin
+var connection: Connection? = null
+try {
+    ...
+    connection = createConnection()
+    ...
+    methodThrowingException()
+    ...
+} catch (e: Exception) {
+    if (connection != null) {
+        connection.close()
+    }
+}
+```
+
+In the catch-block you do not know where the exception was thrown: before or after creating the connection. This means 
+that you do not know if the connection should be closed, or not. Of course there are many ways to solve this.
+
+With the result-monad you can do something like:
+```kotlin
+val connection = createConnection()
+    .getOrElse {
+        log.error { "Could not create connection: ${errorMessage(it)}" }
+        return Err(it)
+    }
+...
+methodGeneratingError()
+    .onFailure {
+        connection.close()
+        return
+    }
+...
+```
 
 ## Usage
 
