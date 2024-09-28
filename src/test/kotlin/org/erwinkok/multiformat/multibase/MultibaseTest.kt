@@ -26,6 +26,7 @@ private val logger = KotlinLogging.logger {}
 internal class MultibaseTest {
     private data class MultibaseSpec(
         val name: String,
+        val unicode: String,
         val code: String,
         val description: String,
         val status: String,
@@ -34,7 +35,7 @@ internal class MultibaseTest {
     @Test
     fun `test specification`() {
         val multibaseSpec = readMultibaseSpec()
-        for (mb in Multibase.values()) {
+        for (mb in Multibase.entries) {
             assertTrue(multibaseSpec.containsKey(mb.encoding), "Specification does define ${mb.encoding}")
             val spec = multibaseSpec[mb.encoding]!!
             assertEquals(spec.code, mb.code, "Code mismatch for ${mb.encoding}: ${spec.code} != ${mb.code}")
@@ -243,14 +244,11 @@ internal class MultibaseTest {
         return reader.lineSequence()
             .filter { it.isNotBlank() }
             .map {
-                val (name, code, description, status) = it.split(',', ignoreCase = false, limit = 4)
-                val sCode = code.trim()
-                val cCode = if (sCode.startsWith("0x")) {
-                    Integer.decode(sCode).toChar().toString()
-                } else {
-                    sCode
-                }
-                MultibaseSpec(name.trim(), cCode, description.trim(), status.trim())
-            }.map { it.name to it }.toMap()
+                val (unicode, character, encoding, description, status) = it.split(',', ignoreCase = false, limit = 5)
+                MultibaseSpec(encoding.trim(), unicode.trim(), character.trim(), description.trim(), status.trim())
+            }.map { it.name to it }
+            .filter { it.second.status != "reserved" }
+            .toMap()
+            .plus("identity" to MultibaseSpec("identity", "U+0000", "\u0000", "8-bit binary (encoder and decoder keeps data unmodified)", "reserved"))
     }
 }

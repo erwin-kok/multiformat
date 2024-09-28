@@ -5,7 +5,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "2.0.20"
 
     `java-library`
     `java-test-fixtures`
