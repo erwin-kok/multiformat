@@ -1,7 +1,7 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multihash
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.erwinkok.multiformat.multicodec.Multicodec
 import org.erwinkok.multiformat.multihash.hashers.Blake2b
 import org.erwinkok.multiformat.multihash.hashers.Blake2s
@@ -71,7 +71,7 @@ object MultihashRegistry {
                 },
                 {
                     val message = "Could not register hasher for $type: ${errorMessage(it)}"
-                    logger.warn(message)
+                    logger.warn { message }
                     Err(message)
                 },
             )
@@ -87,7 +87,7 @@ object MultihashRegistry {
                 },
                 {
                     val message = "Could not register hasher for $type: ${errorMessage(it)}"
-                    logger.warn(message)
+                    logger.warn { message }
                     Err(message)
                 },
             )

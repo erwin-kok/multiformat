@@ -1,7 +1,7 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
 package org.erwinkok.multiformat.multibase
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.erwinkok.result.expectNoErrors
 import org.erwinkok.result.onFailure
 import org.erwinkok.result.onSuccess

@@ -3,12 +3,20 @@ Self-describing values for Future-proofing
 
 [![ci](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml/badge.svg)](https://github.com/erwin-kok/multiformat/actions/workflows/ci.yaml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.erwinkok.multiformat/multiformat)](https://central.sonatype.com/artifact/org.erwinkok.result/result-monad)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.9.0-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![License](https://img.shields.io/github/license/erwin-kok/multiformat.svg)](https://github.com/erwin-kok/multiformat/blob/master/LICENSE)
 
-## Usage
+## Introduction
 
-Kotlin DSL:
+This project provides **Kotlin implementations of the Multiformats protocols**.
+
+Multiformats define self-describing data formats designed to remain interoperable across systems, languages, and decades. They are a foundational building block in systems such as IPFS and libp2p.
+
+The goal of this project is to offer **clear, explicit, and specification-faithful implementations** of the core Multiformats standards, optimized for correctness and readability rather than convenience abstractions.
+
+Specifications are defined at https://multiformats.io.
+
+## Installation
 
 ```kotlin
 repositories {
@@ -20,28 +28,30 @@ dependencies {
 }
 ```
 
-## Introduction
+## Implemented Protocols
 
-This project implements various protocols defined at: https://multiformats.io/
+- **[multiaddr](https://github.com/multiformats/multiaddr)** — Self-describing network addresses
+- **[multibase](https://github.com/multiformats/multibase)** — Base encoding descriptors
+- **[multicodec](https://github.com/multiformats/multicodec)** — Self-describing serialization codes
+- **[multihash](https://github.com/multiformats/multihash)** — Cryptographic hash identifiers
+- **[multistream-select](https://github.com/multiformats/multistream-select)** — Protocol negotiation
 
-Notably, the following protocols are implemented:
+Additionally, this project implements:
+- **[CID](https://github.com/multiformats/cid)** - Content Identifier
 
-- [multiaddr](https://github.com/multiformats/multiaddr): network addresses
-- [multibase](https://github.com/multiformats/multibase): base encodings
-- [multicodec](https://github.com/multiformats/multicodec): serialization codes
-- [multihash](https://github.com/multiformats/multihash): cryptographic hashes
-- [multistream-select](https://github.com/multiformats/multistream-select): Friendly protocol multiplexing.
+## Error Handling Model
 
-Next to this, it also implements Cid: https://github.com/multiformats/cid
+This project uses an explicit Result monad for error handling.
 
+With few exceptions, public APIs return Result<T> instead of throwing exceptions. This makes error propagation explicit, composable, and visible in the type system.
 
-## Using the Result Monad
+This is a deliberate design choice.
 
-This project is using the [result-monad](https://github.com/erwin-kok/result-monad)
+Exceptions are implicit and non-local: once execution enters a try block, it is no longer clear which operation caused control flow to jump to a catch clause. This complicates reasoning about resource ownership and cleanup.
 
-This means that (almost) all methods of this project return a `Result<...>`. The caller can check whether an error was generated, 
-or it can use the value. For example:
+By contrast, Result values make success and failure part of normal control flow.
 
+Example:
 ```kotlin
 val connection = createConnection()
     .getOrElse {
@@ -50,16 +60,8 @@ val connection = createConnection()
     }
 
 connection.write(...)
-
-
-fun createConnection(): Result<Connection> {
-  ...
-}
 ```
-
-The advantage is that it is easier (at least for me) to track the flow of the code and to handle correct/error cases. 
-The disadvantage of exceptions is, is that you do not know which statement in a try-block generated the exception. For 
-example:
+Compared to exception-based control flow:
 
 ```kotlin
 var connection: Connection? = null
@@ -76,10 +78,9 @@ try {
 }
 ```
 
-In the catch-block you do not know where the exception was thrown: before or after creating the connection. This means 
-that you do not know if the connection should be closed, or not. Of course there are many ways to solve this.
+In the catch block, it is unclear whether the connection was successfully created or not.
 
-With the result-monad you can do something like:
+Using Result makes this explicit:
 ```kotlin
 val connection = createConnection()
     .getOrElse {
@@ -94,12 +95,11 @@ methodGeneratingError()
     }
 ...
 ```
+The control flow and resource lifetime are explicit and locally reasoned about.
 
 ## Usage
 
-A (very) brief description on how to use multiformats:
-
-...but please also look at the various tests.
+This section provides a brief overview. For more comprehensive examples, see the test suite.
 
 ### multiaddr
 
@@ -146,7 +146,6 @@ val selected = MultistreamMuxer.selectOneOf(setOf("/a", "/b", "/c"), connection)
     }
 ```
 
-
 ## Sub-modules
 
 This project has three submodules:
@@ -157,16 +156,11 @@ git submodule add https://github.com/multiformats/multibase src/main/kotlin/org/
 git submodule add https://github.com/multiformats/multihash src/main/kotlin/org/erwinkok/multiformat/spec/multihash
 ```
 
-These are the official specifications repositories, which are used here for auto-generation code and or verifying the 
-test results are according to spec.
+They are used for:
 
-## Contributing
-
-Bug reports and pull requests are welcome on [GitHub](https://github.com/erwin-kok/multiformat).
-
-## Contact
-
-If you want to contact me, please write an e-mail to: [erwin.kok(at)protonmail.com](mailto:erwin.kok@protonmail.com)
+- Code generation
+- Conformance testing
+- Verifying behavior against the specifications
 
 ## License
 

@@ -1,11 +1,8 @@
-// Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
-@file:Suppress("UnstableApiUsage")
-
 import com.adarshr.gradle.testlogger.theme.ThemeType
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.3.0"
 
     `java-library`
     `java-test-fixtures`
@@ -30,7 +27,7 @@ repositories {
 }
 
 group = "org.erwinkok.multiformat"
-version = "1.1.0"
+version = "1.2.0"
 
 java {
     withSourcesJar()
@@ -58,33 +55,28 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlinx.coroutines.debug)
 
+    testRuntimeOnly(libs.logback.classic)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 testlogger {
     theme = ThemeType.MOCHA
 }
 
-tasks {
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
+}
 
-    withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_17.toString()
-        targetCompatibility = JavaVersion.VERSION_17.toString()
-    }
+kotlin {
+    jvmToolchain(21)
+}
 
-    withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
-        rejectVersionIf {
-            isNonStable(candidate.version)
-        }
-    }
-
-    test {
-        useJUnitPlatform()
+tasks.withType<DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version)
     }
 }
 
@@ -95,6 +87,10 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 sourceSets {
     main {
         java {
@@ -103,31 +99,21 @@ sourceSets {
     }
 }
 
-koverReport {
-    filters {
-        excludes {
-            classes(
-                "org.erwinkok.multiformat.multicodec.Codec",
-                "org.erwinkok.multiformat.multicodec.GenerateKt*",
-            )
-        }
-    }
-
-    defaults {
-        html {
-            onCheck = true
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "org.erwinkok.multiformat.multicodec.Codec",
+                    "org.erwinkok.multiformat.multicodec.GenerateKt*",
+                )
+            }
         }
 
         verify {
-            onCheck = true
             rule {
-                isEnabled = true
-                entity = kotlinx.kover.gradle.plugin.dsl.GroupingEntityType.APPLICATION
                 bound {
-                    minValue = 0
-                    maxValue = 99
-                    metric = kotlinx.kover.gradle.plugin.dsl.MetricType.LINE
-                    aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
+                    minValue.set(0)
                 }
             }
         }
@@ -153,7 +139,7 @@ publishing {
                     developer {
                         id.set("erwin-kok")
                         name.set("Erwin Kok")
-                        email.set("erwin-kok@gmx.com")
+                        email.set("erwin.kok@protonmail.com")
                         url.set("https://github.com/erwin-kok/")
                         roles.set(listOf("owner", "developer"))
                     }
