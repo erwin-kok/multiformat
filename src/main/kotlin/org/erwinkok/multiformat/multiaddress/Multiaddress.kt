@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 class Multiaddress private constructor(val components: List<Component>) {
-    private val _string: String by lazy { constructString() }
+    private val string: String by lazy { constructString() }
     val bytes: ByteArray by lazy { constructBytes() }
 
     fun encapsulate(address: String): Result<Multiaddress> {
@@ -58,7 +58,7 @@ class Multiaddress private constructor(val components: List<Component>) {
     }
 
     override fun toString(): String {
-        return _string
+        return string
     }
 
     override fun equals(other: Any?): Boolean {

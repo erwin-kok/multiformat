@@ -1,5 +1,4 @@
 // Copyright (c) 2022 Erwin Kok. BSD-3-Clause license. See LICENSE file for more details.
-// ktlint-disable filename
 package org.erwinkok.multiformat.multicodec
 
 import java.io.BufferedReader

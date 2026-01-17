@@ -3,19 +3,14 @@
 
 package org.erwinkok.multiformat.multistream
 
-import io.ktor.utils.io.core.BytePacketBuilder
-import io.ktor.utils.io.core.buildPacket
-import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.core.writeFully
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.erwinkok.multiformat.util.UVarInt
-import org.erwinkok.result.Err
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import org.erwinkok.result.Error
-import org.erwinkok.result.Errors
 import org.erwinkok.result.Ok
-import org.erwinkok.result.Result
 import org.erwinkok.result.coAssertErrorResult
 import org.erwinkok.result.expectNoErrors
 import org.erwinkok.result.getError
@@ -47,6 +42,8 @@ internal class MultistreamMuxerTest {
         )
 
         val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.of("/proto1")), localConnection).expectNoErrors()
+        localConnection.close()
+
         assertEquals("/proto1", selectOneResult.id)
 
         remoteReceived(
@@ -74,6 +71,8 @@ internal class MultistreamMuxerTest {
             ),
             localConnection,
         ).expectNoErrors()
+        localConnection.close()
+
         assertEquals("/proto3", selectOneResult.id)
 
         remoteReceived(
@@ -92,6 +91,8 @@ internal class MultistreamMuxerTest {
         )
 
         val selectOneResult = MultistreamMuxer.selectOneOf(setOf(ProtocolId.of("/proto2")), localConnection)
+        localConnection.close()
+
         assertEquals(Error("Peer does not support any of the given protocols"), selectOneResult.getError())
 
         remoteReceived(
@@ -109,6 +110,8 @@ internal class MultistreamMuxerTest {
 
         muxer.addHandler(ProtocolId.of("/proto3"))
         val negotiateResult = muxer.negotiate(localConnection).expectNoErrors()
+        localConnection.close()
+
         assertEquals("/proto3", negotiateResult.protocol.id)
         assertEquals(null, negotiateResult.handler)
 
@@ -134,6 +137,8 @@ internal class MultistreamMuxerTest {
                 Ok(Unit)
             }
             val negotiateResult = muxer.negotiate(localConnection).expectNoErrors()
+            localConnection.close()
+
             assertEquals("/proto4", negotiateResult.protocol.id)
             assertNotNull(negotiateResult.handler)
             negotiateResult.handler?.invoke(ProtocolId.of("AProtocol"), remoteConnection)
@@ -155,6 +160,8 @@ internal class MultistreamMuxerTest {
             )
 
             val listResult = muxer.list(localConnection).expectNoErrors()
+            localConnection.close()
+
             assertEquals("/proto1, /proto2, /proto3/sub-proto", listResult.joinToString(", "))
 
             remoteReceived(
@@ -267,7 +274,7 @@ internal class MultistreamMuxerTest {
         var simOpenInfo: SimOpenInfo? = null
         val job = launch {
             simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.of("/a")), remoteConnection).expectNoErrors()
-            assertEquals("/a", simOpenInfo!!.protocol.id, "incorrect protocol selected")
+            assertEquals("/a", simOpenInfo.protocol.id, "incorrect protocol selected")
         }
         val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.of("/a")), localConnection).expectNoErrors()
         assertEquals("/a", simOpenInfo2.protocol.id, "incorrect protocol selected")
@@ -280,7 +287,7 @@ internal class MultistreamMuxerTest {
         var simOpenInfo: SimOpenInfo? = null
         val job = launch {
             simOpenInfo = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.of("/a"), ProtocolId.of("/b")), remoteConnection).expectNoErrors()
-            assertEquals("/b", simOpenInfo!!.protocol.id, "incorrect protocol selected")
+            assertEquals("/b", simOpenInfo.protocol.id, "incorrect protocol selected")
         }
         val simOpenInfo2 = MultistreamMuxer.selectWithSimopenOrFail(setOf(ProtocolId.of("/b")), localConnection).expectNoErrors()
         assertEquals("/b", simOpenInfo2.protocol.id, "incorrect protocol selected")
@@ -300,38 +307,24 @@ internal class MultistreamMuxerTest {
     }
 
     private suspend fun remoteSends(vararg messages: String) {
-        val packet = buildPacket {
-            for (message in messages) {
-                val messageNewline = message + '\n'
-                writeUnsignedVarInt(messageNewline.length.toULong())
-                writeFully(messageNewline.toByteArray())
-            }
+        val buffer = Buffer()
+        for (message in messages) {
+            val messageNewline = message + '\n'
+            buffer.writeUnsignedVarInt(messageNewline.length.toULong())
+            buffer.writeFully(messageNewline.toByteArray())
         }
-        remoteConnection.output.writePacket(packet)
-        remoteConnection.output.flush()
+        remoteConnection.writeRawBuffer(buffer)
     }
 
     private suspend fun remoteReceived(vararg messages: String) {
-        val packet = buildPacket {
-            for (message in messages) {
-                val messageNewline = message + '\n'
-                writeUnsignedVarInt(messageNewline.length.toULong())
-                writeFully(messageNewline.toByteArray())
-            }
+        val buffer = Buffer()
+        for (message in messages) {
+            val messageNewline = message + '\n'
+            buffer.writeUnsignedVarInt(messageNewline.length.toULong())
+            buffer.writeFully(messageNewline.toByteArray())
         }
-        val expected = String(packet.readBytes())
-        val actual = String(remoteConnection.readAll().readBytes())
+        val expected = String(buffer.readByteArray())
+        val actual = String(remoteConnection.readRawBuffer().readByteArray())
         assertEquals(expected, actual)
-    }
-}
-
-fun BytePacketBuilder.writeUnsignedVarInt(x: ULong): Result<Int> {
-    return UVarInt.writeUnsignedVarInt(x) {
-        try {
-            this.writeByte(it)
-            Ok(Unit)
-        } catch (e: Exception) {
-            Err(Errors.EndOfStream)
-        }
     }
 }
